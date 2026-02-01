@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendamento - Barbearia Madruga</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1c1c">
+
+  <!-- Fonte Barber -->
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo-wrapper">
+      <img src="logo.png" alt="Logo Barbearia Madruga" class="logo">
+    </div>
+
+    <h1>Agendamento Online 💈</h1>
+
+    <h3 class="barber-nome">Barber Madruga</h3>
+    <p class="barbeiro-nome">Barbeiro Ricardo</p>
+
+    <form id="formAgendamento">
+
+      <input type="text" id="nome" placeholder="Nome do cliente" required>
+      <input type="tel" id="telefone" placeholder="WhatsApp (DDD + número)" required>
+      <input type="date" id="data" required>
+
+      <select id="hora" required>
+        <option value="" disabled selected>Escolha a data e o horário</option>
+      </select>
+
+      <!-- SELECT SERVIÇOS CORRIGIDO -->
+      <select id="servico" required>
+        <option value="" disabled selected>Selecione um serviço</option>
+
+        <option value="Corte Degradê">Corte Degradê</option>
+        <option value="Corte Navalhado">Corte Navalhado</option>
+
+        <option value="Barba">Barba</option>
+        <option value="Corte + Barba">Corte + Barba</option>
+
+        <option value="Sobrancelha">Sobrancelha</option>
+        <option value="Pezinho">Pezinho</option>
+
+        <option value="Corte + Sobrancelha">Corte + Sobrancelha</option>
+        <option value="Pigmentação + Corte">Pigmentação + Corte
+        </option>
+        <option value="Luzes + Corte">Luzes + Corte</option>
+        <option value="Platinado + Corte">Platinado + Corte</option>
+        
+      </select>
+
+      <input type="text" id="preco" placeholder="Preço (R$)" disabled>
+
+    <button type="submit">Agendar</button>
+<button type="button" id="btnLembreteBarbearia">
+  Enviar lembrete para barbearia
+</button>
+</form>
+
+<p id="mensagem"></p>
+
+<h2>Agenda Ativa</h2>
+<ul id="listaAgendamentos"></ul>
+
+<h2>Histórico de Atendimentos</h2>
+<ul id="listaHistorico"></ul>
+
+<button type="button" id="btnLimparHistorico" class="admin-only">
+  Limpar histórico
+</button>
+<button type="button" id="btnRelatorioDiario">
+  Enviar relatório do dia 📊
+</button>
+
+  <footer class="rodape">
+    <p>© 2026 • Barber Madruga</p>
+    <p>Desenvolvido por Ricardo</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

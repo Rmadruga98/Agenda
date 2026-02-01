@@ -1,0 +1,313 @@
+document.addEventListener("DOMContentLoaded", () => {
+
+  // ===== ELEMENTOS =====
+  const WHATSAPP_BARBEARIA = "5535998066403";
+
+  const form = document.getElementById("formAgendamento");
+  const listaAgendamentos = document.getElementById("listaAgendamentos");
+  const listaHistorico = document.getElementById("listaHistorico");
+  const mensagem = document.getElementById("mensagem");
+  const selectServico = document.getElementById("servico");
+  const selectHora = document.getElementById("hora");
+  const inputPreco = document.getElementById("preco");
+  const inputData = document.getElementById("data");
+  const btnLembreteBarbearia = document.getElementById("btnLembreteBarbearia");
+  const btnLimparHistorico = document.getElementById("btnLimparHistorico");
+
+  // ===== PREÇOS =====
+  const tabelaPrecos = {
+    "Corte Degradê": 35,
+    "Corte Simples": 38,
+    "Barba": 20,
+    "Corte + Barba": 55,
+    "Sobrancelha": 10,
+    "Pezinho": 20,
+    "Corte + Sobrancelha": 40,
+    "Corte + Barba + Sobrancelha": 60,
+    "Pigmentação + Corte": 60,
+    "Luzes + Corte": 75,
+    "Platinado + Corte": 110
+  };
+
+  // ===== HORÁRIOS FIXOS =====
+  function gerarHorarios() {
+    const h = [];
+    for (let i = 8; i < 19; i++) {
+      h.push(`${String(i).padStart(2,"0")}:00`);
+      h.push(`${String(i).padStart(2,"0")}:30`);
+    }
+    return h;
+  }
+
+  // ===== CARREGAR HORÁRIOS (COM BLOQUEIO) =====
+  function carregarHorarios() {
+    selectHora.innerHTML = `<option disabled selected>Selecione um horário</option>`;
+    if (!inputData.value) return;
+
+    const dataSelecionada = inputData.value;
+    const agora = new Date();
+    const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+    gerarHorarios().forEach(hora => {
+      const dataHora = new Date(`${dataSelecionada}T${hora}`);
+
+      if (dataHora <= agora) return;
+
+      const ocupado = agendamentos.some(a =>
+        a.dataISO === dataSelecionada && a.hora === hora
+      );
+
+      if (ocupado) return;
+
+      const op = document.createElement("option");
+      op.value = hora;
+      op.textContent = hora;
+      selectHora.appendChild(op);
+    });
+  }
+
+  inputData.addEventListener("change", carregarHorarios);
+  carregarHorarios();
+
+  // ===== PREÇO AUTOMÁTICO =====
+  selectServico.addEventListener("change", () => {
+    inputPreco.value = `R$ ${tabelaPrecos[selectServico.value] || ""}`;
+  });
+
+  // ===== FORMATAR DATA =====
+  function formatarData(dataISO) {
+    const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+    const d = new Date(dataISO + "T00:00");
+    return `${dias[d.getDay()]} • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+  }
+
+  // ===== SALVAR AGENDAMENTO =====
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+
+    const agendamento = {
+      nome: nome.value,
+      telefone: telefone.value,
+      dataISO: inputData.value,
+      data: formatarData(inputData.value),
+      hora: selectHora.value,
+      servico: selectServico.value,
+      preco: tabelaPrecos[selectServico.value]
+    };
+
+    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+    lista.push(agendamento);
+    localStorage.setItem("agendamentos", JSON.stringify(lista));
+
+    mensagem.textContent = "✅ Agendamento confirmado!";
+    mensagem.style.color = "lime";
+
+    carregarAgendamentos();
+    enviarWhatsappCliente(agendamento);
+
+    form.reset();
+    inputPreco.value = "";
+  });
+
+  // ===== LISTAGEM =====
+  function carregarAgendamentos() {
+    listaAgendamentos.innerHTML = "";
+    listaHistorico.innerHTML = "";
+
+    const agora = new Date();
+    agora.setSeconds(0,0);
+
+    let lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+    lista.sort((a,b) =>
+      new Date(`${a.dataISO}T${a.hora}`) - new Date(`${b.dataISO}T${b.hora}`)
+    );
+
+    lista.forEach(a => {
+      const dh = new Date(`${a.dataISO}T${a.hora}`);
+      dh.setSeconds(0,0);
+
+      const li = document.createElement("li");
+      li.textContent = `${a.data} | ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}`;
+
+      if (dh > agora) {
+        listaAgendamentos.appendChild(li);
+      } else {
+        li.classList.add("realizado");
+        listaHistorico.appendChild(li);
+      }
+    });
+  }
+  carregarAgendamentos();
+
+  // ===== WHATSAPP CLIENTE =====
+  function enviarWhatsappCliente(a) {
+    const tel = a.telefone.replace(/\D/g,"");
+
+    const msg = `
+💈 Barbearia Madruga
+
+Olá, ${a.nome}! 👋
+Seu agendamento foi registrado com sucesso ✅
+
+📅 ${a.data}
+⏰ ${a.hora}
+✂️ ${a.servico}
+💰 Valor: R$ ${a.preco}
+
+⚠️ IMPORTANTE
+Volte ao site e toque no botão:
+👉 Enviar lembrete para barbearia
+`;
+
+    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  // ===== LEMBRETE BARBEARIA (BOTÃO) =====
+  if (btnLembreteBarbearia) {
+    btnLembreteBarbearia.addEventListener("click", () => {
+      const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+      if (!lista.length) return alert("Nenhum agendamento encontrado.");
+
+      const a = lista[lista.length - 1];
+
+      const msg = `
+📌 NOVO AGENDAMENTO
+
+👤 ${a.nome}
+📞 ${a.telefone}
+📅 ${a.data}
+⏰ ${a.hora}
+✂️ ${a.servico}
+💰 R$ ${a.preco}
+`;
+
+      window.open(
+        `https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(msg)}`,
+        "_blank"
+      );
+    });
+  }
+
+  // ===== LIMPAR HISTÓRICO (ADMIN) =====
+  if (btnLimparHistorico) {
+    btnLimparHistorico.style.display = "none";
+
+    btnLimparHistorico.addEventListener("click", () => {
+      if (!confirm("Deseja apagar todo o histórico?")) return;
+
+      const agora = new Date();
+      agora.setSeconds(0,0);
+
+      let lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+      lista = lista.filter(a => new Date(`${a.dataISO}T${a.hora}`) > agora);
+
+      localStorage.setItem("agendamentos", JSON.stringify(lista));
+      carregarAgendamentos();
+
+      alert("Histórico apagado com sucesso!");
+    });
+  }
+
+  // ===== ADMIN COM EXPIRAÇÃO =====
+  const SENHA_ADMIN = "madruga123";
+  let cliquesAdmin = 0;
+  const titulo = document.querySelector("h1");
+
+  function liberarModoAdmin() {
+    const senha = prompt("Área restrita. Digite a senha:");
+    if (senha !== SENHA_ADMIN) return alert("Senha incorreta.");
+
+    btnLimparHistorico.style.display = "block";
+    alert("Modo administrador ativado por 5 minutos.");
+
+    const expiraEm = Date.now() + (5 * 60 * 1000);
+    localStorage.setItem("adminExpira", expiraEm);
+
+    setTimeout(desativarModoAdmin, 5 * 60 * 1000);
+  }
+
+  function desativarModoAdmin() {
+    btnLimparHistorico.style.display = "none";
+    localStorage.removeItem("adminExpira");
+  }
+
+  if (titulo) {
+    titulo.addEventListener("click", () => {
+      cliquesAdmin++;
+      if (cliquesAdmin === 3) {
+        cliquesAdmin = 0;
+        liberarModoAdmin();
+      }
+    });
+  }
+
+  const expiraSalvo = localStorage.getItem("adminExpira");
+  if (expiraSalvo && Date.now() < expiraSalvo) {
+    btnLimparHistorico.style.display = "block";
+    setTimeout(desativarModoAdmin, expiraSalvo - Date.now());
+  }
+// ===== RELATÓRIO DIÁRIO =====
+  const btnRelatorioDiario = document.getElementById("btnRelatorioDiario");
+
+  function enviarRelatorioDiario() {
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+
+    const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+    let totalClientes = 0;
+    let faturamento = 0;
+    const servicos = {};
+
+    agendamentos.forEach(a => {
+      const dataAg = new Date(`${a.dataISO}T${a.hora}`);
+      dataAg.setHours(0,0,0,0);
+
+      if (dataAg.getTime() === hoje.getTime()) {
+        totalClientes++;
+        faturamento += Number(a.preco);
+        servicos[a.servico] = (servicos[a.servico] || 0) + 1;
+      }
+    });
+
+    if (totalClientes === 0) {
+      alert("Nenhum atendimento realizado hoje.");
+      return;
+    }
+
+    let resumoServicos = "";
+    for (let s in servicos) {
+      resumoServicos += `• ${s}: ${servicos[s]}\n`;
+    }
+
+    const dataFormatada = hoje.toLocaleDateString("pt-BR");
+
+    const msg = `
+📊 RELATÓRIO DIÁRIO – ${dataFormatada}
+
+👥 Clientes atendidos: ${totalClientes}
+💰 Faturamento total: R$ ${faturamento}
+
+✂️ Serviços realizados:
+${resumoServicos}
+
+💈 Barbearia Madruga
+`;
+
+    window.open(
+      `https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  }
+
+  if (btnRelatorioDiario) {
+    btnRelatorioDiario.addEventListener("click", enviarRelatorioDiario);
+  }
+  if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("service-worker.js")
+    .then(() => console.log("Service Worker registrado"))
+    .catch(err => console.error("Erro no SW", err));
+}
+});
