@@ -45,28 +45,27 @@ function esconderAreaAdmin() {
   esconderAreaAdmin();
 
   // ===== PREÇOS =====
-  const tabelaPrecos = {
-    "Corte Degradê": 35,
-    "Corte Navalhado": 38,
-    "Barba": 20,
-    "Corte + Barba": 55,
-    "Sobrancelha": 10,
-    "Pezinho": 20,
-    "Corte + Barba + Sobrancelha": 60,
-    "Pigmentação + Corte": 60,
-    "Luzes + Corte": 75,
-    "Platinado + Corte": 110
-  };
+const servicos = {
+  "Corte Degradê": { preco: 35, duracao: 60 },
+  "Corte Navalhado": { preco: 38, duracao: 60 },
+  "Barba": { preco: 20, duracao: 30 },
+  "Corte + Barba": { preco: 55, duracao: 90 },
+  "Sobrancelha": { preco: 10, duracao: 15 },
+  "Pezinho": { preco: 20, duracao: 15 },
+  "Corte + Barba + Sobrancelha": { preco: 60, duracao: 105 },
+  "Pigmentação + Corte": { preco: 60, duracao: 120 },
+  "Luzes + Corte": { preco: 75, duracao: 120 },
+  "Platinado + Corte": { preco: 110, duracao: 180 }
+};
 
   // ===== HORÁRIOS =====
-  function gerarHorarios() {
-    const h = [];
-    for (let i = 8; i < 19; i++) {
-      h.push(`${String(i).padStart(2, "0")}:00`);
-      h.push(`${String(i).padStart(2, "0")}:30`);
-    }
-    return h;
+function gerarHorarios() {
+  const h = [];
+  for (let i = 8; i < 19; i++) {
+    h.push(`${String(i).padStart(2,"0")}:00`);
   }
+  return h;
+}
 
   function carregarHorarios() {
     selectHora.innerHTML = `<option disabled selected>Selecione um horário</option>`;
@@ -96,7 +95,9 @@ function esconderAreaAdmin() {
 
   // ===== PREÇO AUTOMÁTICO =====
   selectServico.addEventListener("change", () => {
-    inputPreco.value = `R$ ${tabelaPrecos[selectServico.value] || ""}`;
+  if (servicos[selectServico.value]) {
+  inputPreco.value = `R$ ${servicos[selectServico.value].preco}`;
+}
   });
 
   // ===== FORMATAR DATA =====
@@ -105,21 +106,29 @@ function esconderAreaAdmin() {
     const d = new Date(dataISO + "T00:00");
     return `${dias[d.getDay()]} • ${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   }
+  // ===== CALCULAR HORA FINAL DO SERVIÇO =====
+function calcularHoraFim(horaInicio, duracaoMin) {
+  const [h, m] = horaInicio.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m + duracaoMin, 0, 0);
+  return d.toTimeString().slice(0,5);
+}
 
   // ===== SALVAR AGENDAMENTO =====
   form.addEventListener("submit", e => {
     e.preventDefault();
     if (!selectHora.value) return alert("Selecione um horário");
 
-    const agendamento = {
-      nome: nomeInput.value,
-      telefone: telefoneInput.value,
-      dataISO: inputData.value,
-      data: formatarData(inputData.value),
-      hora: selectHora.value,
-      servico: selectServico.value,
-      preco: tabelaPrecos[selectServico.value]
-    };
+const agendamento = {
+  nome: nome.value,
+  telefone: telefone.value,
+  dataISO: inputData.value,
+  data: formatarData(inputData.value),
+  hora: selectHora.value,
+  servico: selectServico.value,
+  preco: servicos[selectServico.value].preco,
+  duracao: servicos[selectServico.value].duracao
+};
 
     const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
     lista.push(agendamento);
@@ -237,32 +246,62 @@ Olá, ${a.nome}! 👋
     setTimeout(desativarAdmin, expiraSalvo - Date.now());
   }
 
-  // ===== RELATÓRIO DIÁRIO =====
-  if (btnRelatorioDiario) {
-    btnRelatorioDiario.addEventListener("click", () => {
-      const hoje = new Date().toDateString();
-      const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+// ===== RELATÓRIO DIÁRIO DETALHADO =====
+if (btnRelatorioDiario) {
+  btnRelatorioDiario.addEventListener("click", () => {
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
 
-      let total = 0;
-      let valor = 0;
+    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
-      lista.forEach(a => {
-        if (new Date(a.dataISO).toDateString() === hoje) {
-          total++;
-          valor += Number(a.preco);
-        }
-      });
+    let totalClientes = 0;
+    let faturamento = 0;
+    const servicosRealizados = {};
 
-      if (!total) return alert("Nenhum atendimento hoje.");
+    lista.forEach(a => {
+      const dataAg = new Date(`${a.dataISO}T${a.hora}`);
+      dataAg.setHours(0,0,0,0);
 
-      const msg = `
-📊 RELATÓRIO DO DIA
-👥 Clientes: ${total}
-💰 Total: R$ ${valor}
-`;
-      window.open(`https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(msg)}`, "_blank");
+      if (dataAg.getTime() === hoje.getTime()) {
+        totalClientes++;
+        faturamento += Number(a.preco);
+
+        // conta serviços
+        servicosRealizados[a.servico] =
+          (servicosRealizados[a.servico] || 0) + 1;
+      }
     });
-  }
+
+    if (!totalClientes) {
+      alert("Nenhum atendimento realizado hoje.");
+      return;
+    }
+
+    let listaServicos = "";
+    for (let s in servicosRealizados) {
+      listaServicos += `• ${s}: ${servicosRealizados[s]}\n`;
+    }
+
+    const dataFormatada = hoje.toLocaleDateString("pt-BR");
+
+    const msg = `
+📊 RELATÓRIO DO DIA – ${dataFormatada}
+
+👥 Clientes atendidos: ${totalClientes}
+💰 Faturamento total: R$ ${faturamento}
+
+✂️ Serviços realizados:
+${listaServicos}
+
+💈 Barbearia Madruga
+`;
+
+    window.open(
+      `https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  });
+}
 
   // ===== SERVICE WORKER =====
   if ("serviceWorker" in navigator) {
