@@ -26,7 +26,7 @@
     </div>
 
     <h1>Agendamento Online 💈</h1>
-    <button id="btnInstalar" style="display:none;">
+    <button id="btnInstalar" class="btn-instalar">
   📲 Instalar aplicativo
 </button>
 
@@ -44,33 +44,35 @@
       <label for="data">Data:</label>
       <input type="date" id="data" required>
 
-      <label for="hora">Horário:</label>
-      <select id="hora" required>
-        <option value="" disabled selected>Escolha a data e o horário</option>
-      </select>
+<label>Horário:</label>
 
-      <label for="servico">Serviço:</label>
-      <select id="servico" required>
-        <option value="" disabled selected>Selecione um serviço</option>
-        <option value="Corte Degradê">Corte Degradê</option>
-        <option value="Corte Navalhado">Corte Navalhado</option>
-        <option value="Barba">Barba</option>
-        <option value="Corte + Barba">Corte + Barba</option>
-        <option value="Sobrancelha">Sobrancelha</option>
-        <option value="Pezinho">Pezinho</option>
-        <option value="Corte + Barba + Sobrancelha">Corte + Barba + Sobrancelha</option>
-        <option value="Pigmentação + Corte">Pigmentação + Corte</option>
-        <option value="Luzes + Corte">Luzes + Corte</option>
-        <option value="Platinado + Corte">Platinado + Corte</option>
-      </select>
+<div id="horarios" class="horarios"></div>
+
+<input type="hidden" id="hora" required>
+
+<label for="servico">Serviço:</label>
+<select id="servico" required>
+  <option value="" disabled selected>Selecione um serviço</option>
+
+  <option value="Corte Degradê">Corte Degradê</option>
+  <option value="Corte Navalhado">Corte Navalhado</option>
+  <option value="Barba">Barba</option>
+  <option value="Corte + Barba">Corte + Barba</option>
+  <option value="Sobrancelha">Sobrancelha</option>
+  <option value="Pezinho">Pezinho</option>
+  <option value="Corte + Barba + Sobrancelha">
+    Corte + Barba + Sobrancelha
+  </option>
+  <option value="Pigmentação + Corte">Pigmentação + Corte</option>
+  <option value="Luzes + Corte">Luzes + Corte</option>
+  <option value="Platinado + Corte">Platinado + Corte</option>
+</select>
 
       <label for="preco">Preço (R$):</label>
       <input type="text" id="preco" readonly placeholder="Preço (R$)">
 
       <button type="submit">Agendar</button>
-      <button type="button" id="btnLembreteBarbearia">
-        Enviar lembrete para barbearia
-      </button>
+    
     </form>
 
     <p id="mensagem"></p>

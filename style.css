@@ -1,154 +1,186 @@
 body {
-font-family: Arial, sans-serif;
-background: #0f0f0f;
-margin: 0;
-padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #0f0f0f;
+  margin: 0;
+  padding: 20px;
 }
 
+/* ===== CONTAINER ===== */
 .container {
-max-width: 500px;
-margin: 0 auto;
-background: #1c1c1c;
-padding: 25px;
-border-radius: 18px;
-box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #1c1c1c;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  text-align: center;
 }
 
+/* ===== LOGO ===== */
 .logo-wrapper {
-width: 220px;
-height: 220px;
-margin: 0 auto 12px auto;
-background: #1c1c1c;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 12px auto;
+  background: #1c1c1c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
 .logo {
-max-width: 85%;
-max-height: 85%;
+  max-width: 85%;
+  max-height: 85%;
 }
 
+/* ===== TÍTULOS ===== */
 h1 {
-    margin: 0 0 12px 0;
-    color: #f5f5f5;
-    font-size: 24px;
-    text-align: center;
+  margin: 0 0 12px 0;
+  color: #f5f5f5;
+  font-size: 24px;
 }
 
 h2 {
-color: #e0e0e0;
-margin: 20px 0 10px 0;
+  color: #e0e0e0;
+  margin: 20px 0 10px 0;
 }
 
 .barber-nome {
-font-family: 'Anton', sans-serif;
-font-size: 22px;
-letter-spacing: 2px;
-color: #cfa24a;
-margin-top: -6px;
-margin-bottom: 8px;
+  font-family: 'Anton', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #cfa24a;
+  margin-top: -6px;
+  margin-bottom: 8px;
 }
 
 .barbeiro-nome {
-font-size: 13px;
-color: #999;
-letter-spacing: 1.5px;
-text-transform: uppercase;
-margin-bottom: 20px;
+  font-size: 13px;
+  color: #999;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
 
+/* ===== LABELS ===== */
+label {
+  color: #fff;
+  font-size: 14px;
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+}
+
+/* ===== INPUTS ===== */
 input,
 select {
-width: 100%;
-padding: 12px;
-margin: 8px 0;
-border-radius: 10px;
-border: 1px solid #333;
-background: #2a2a2a;
-color: #f5f5f5;
-font-size: 16px;
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #2a2a2a;
+  color: #f5f5f5;
+  font-size: 16px;
 }
 
+/* ===== BOTÕES ===== */
 button {
-width: 100%;
-padding: 12px;
-margin-top: 10px;
-border-radius: 10px;
-border: none;
-background: #1e90ff;
-color: #fff;
-font-size: 16px;
-cursor: pointer;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #1e90ff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 button:hover {
-opacity: 0.9;
+  opacity: 0.9;
 }
 
-.rodape {
-margin-top: 40px;
-padding: 15px 10px;
-text-align: center;
-font-size: 13px;
-color: #888;
-border-top: 1px solid #222;
+/* ===== BOTÃO INSTALAR APP ===== */
+.btn-instalar {
+  width: 100%;
+  margin: 15px 0 25px;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 114, 255, 0.4);
+  animation: pulse 1.5s infinite;
+  display: none;
 }
 
-/* === Colors of Active Appointments === */
+/* animação do botão instalar */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0,114,255,0.7);
+  }
+  70% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 12px rgba(0,114,255,0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ===== HORÁRIOS (CARDS) ===== */
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 10px 0 20px;
+}
+
+.hora-btn {
+  padding: 14px 0;
+  border-radius: 12px;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.hora-btn.ativa {
+  background: #1e90ff;
+  border-color: #1e90ff;
+}
+
+.hora-btn.indisponivel {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ===== LISTAS ===== */
 #listaAgendamentos li {
-    color: #4caf50; /* Green */
-    font-weight: 500;
+  color: #4caf50;
+  font-weight: 500;
 }
 
-/* === Historical Attendance Color === */
 #listaHistorico li {
-color: #ff9800; /* Orange */
-font-weight: 500;
+  color: #ff9800;
+  font-weight: 500;
 }
 
-/* === Animation for New Appointment === */
-@keyframes novoAgendamento {
-0% {
-opacity: 0;
-transform: translateY(-15px);
-background-color: rgba(76, 175, 80, 0.2);
-}
-100% {
-opacity: 1;
-transform: translateY(0);
-background-color: transparent;
-}
-}
-
-.novo-agendamento {
-animation: novoAgendamento 0.6s ease-out;
-}
-
-/* Completed Appointments */
 .realizado {
-color: #ff4d4d;
-text-decoration: line-through; /* Strikethrough */
-opacity: 0.8;
-border-left: 4px solid #ff4d4d;
-padding-left: 8px;
+  color: #ff4d4d;
+  text-decoration: line-through;
+  opacity: 0.8;
+  border-left: 4px solid #ff4d4d;
+  padding-left: 8px;
 }
 
-/* Button for administration (hidden by default) */
-.admin-only {
-display: none;
-}
-label {
-    color: #ffffff !important;
-    font-size: 14px;
-    display: block;
-    text-align: left;
-    margin-top: 10px;
-}
-/* ===== ÁREA ADMIN (ESCONDIDA POR PADRÃO) ===== */
+/* ===== ÁREA ADMIN (ESCONDIDA) ===== */
 #tituloAgenda,
 #listaAgendamentos,
 #tituloHistorico,
@@ -156,4 +188,40 @@ label {
 #btnLimparHistorico,
 #btnRelatorioDiario {
   display: none;
+}
+
+/* ===== RODAPÉ ===== */
+.rodape {
+  margin-top: 40px;
+  padding: 15px 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  border-top: 1px solid #222;
+}
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 10px 0 20px;
+}
+
+.hora-btn {
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #333;
+  background: #1c1c1c;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.hora-btn:hover {
+  border-color: #f5b400;
+}
+
+.hora-btn.ativa {
+  background: #f5b400;
+  color: #000;
+  border-color: #f5b400;
 }
