@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <title>Agendamento - Barbearia Madruga</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1c1c1c">
 
-  <!-- Fonte Barber -->
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1c1c1c">
+  <link rel="icon" href="logo.png">
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
 
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -28,63 +32,81 @@
 
     <form id="formAgendamento">
 
-      <input type="text" id="nome" placeholder="Nome do cliente" required>
-      <input type="tel" id="telefone" placeholder="WhatsApp (DDD + número)" required>
+      <label for="nome">Nome do cliente:</label>
+      <input type="text" id="nome" required>
+
+      <label for="telefone">WhatsApp (DDD + número):</label>
+      <input type="tel" id="telefone" pattern="\d{2}\d{4,5}\d{4}" required placeholder="Ex: 11987654321">
+
+      <label for="data">Data:</label>
       <input type="date" id="data" required>
 
+      <label for="hora">Horário:</label>
       <select id="hora" required>
         <option value="" disabled selected>Escolha a data e o horário</option>
       </select>
 
-      <!-- SELECT SERVIÇOS CORRIGIDO -->
+      <label for="servico">Serviço:</label>
       <select id="servico" required>
         <option value="" disabled selected>Selecione um serviço</option>
-
         <option value="Corte Degradê">Corte Degradê</option>
         <option value="Corte Navalhado">Corte Navalhado</option>
-
         <option value="Barba">Barba</option>
         <option value="Corte + Barba">Corte + Barba</option>
-
         <option value="Sobrancelha">Sobrancelha</option>
         <option value="Pezinho">Pezinho</option>
-
-        <option value="Corte + Sobrancelha">Corte + Sobrancelha</option>
-        <option value="Pigmentação + Corte">Pigmentação + Corte
-        </option>
+        <option value="Corte + Barba + Sobrancelha">Corte + Barba + Sobrancelha</option>
+        <option value="Pigmentação + Corte">Pigmentação + Corte</option>
         <option value="Luzes + Corte">Luzes + Corte</option>
         <option value="Platinado + Corte">Platinado + Corte</option>
-        
       </select>
 
-      <input type="text" id="preco" placeholder="Preço (R$)" disabled>
+      <label for="preco">Preço (R$):</label>
+      <input type="text" id="preco" readonly placeholder="Preço (R$)">
 
-    <button type="submit">Agendar</button>
-<button type="button" id="btnLembreteBarbearia">
-  Enviar lembrete para barbearia
-</button>
-</form>
+      <button type="submit">Agendar</button>
+      <button type="button" id="btnLembreteBarbearia">
+        Enviar lembrete para barbearia
+      </button>
+    </form>
 
-<p id="mensagem"></p>
+    <p id="mensagem"></p>
 
-<h2>Agenda Ativa</h2>
-<ul id="listaAgendamentos"></ul>
+    <!-- 🔐 ÁREA ADMIN (controlada pelo JS) -->
+    <h2 id="tituloAgenda">Agenda Ativa</h2>
+    <ul id="listaAgendamentos"></ul>
 
-<h2>Histórico de Atendimentos</h2>
-<ul id="listaHistorico"></ul>
+    <h2 id="tituloHistorico">Histórico de Atendimentos</h2>
+    <ul id="listaHistorico"></ul>
 
-<button type="button" id="btnLimparHistorico" class="admin-only">
-  Limpar histórico
-</button>
-<button type="button" id="btnRelatorioDiario">
-  Enviar relatório do dia 📊
-</button>
+    <button type="button" id="btnLimparHistorico">
+      Limpar histórico
+    </button>
 
-  <footer class="rodape">
-    <p>© 2026 • Barber Madruga</p>
-    <p>Desenvolvido por Ricardo</p>
-  </footer>
+    <button type="button" id="btnRelatorioDiario">
+      Enviar relatório do dia 📊
+    </button>
 
+    <footer class="rodape">
+      <p>© 2026 • Barber Madruga</p>
+      <p>Desenvolvido por Ricardo</p>
+    </footer>
+
+  </div>
+
+  <!-- JS -->
   <script src="script.js"></script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(() => console.log("Service Worker registrado"))
+          .catch(err => console.error("Erro no SW:", err));
+      });
+    }
+  </script>
+
 </body>
 </html>
