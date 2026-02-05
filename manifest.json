@@ -21,5 +21,8 @@
     }
   ],
   "dir": "ltr",
-  "lang": "pt"
+  "lang": "pt",
+  "display_override": [
+    "window-controls-overlay"
+  ]
 }
