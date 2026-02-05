@@ -271,4 +271,27 @@ Olá, ${a.nome}! 👋
   
   carregarHorarios();
   carregarAgendamentos();
+  let deferredPrompt;
+const btnInstalar = document.getElementById("btnInstalar");
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  if (btnInstalar) {
+    btnInstalar.style.display = "block";
+  }
+});
+
+if (btnInstalar) {
+  btnInstalar.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+    btnInstalar.style.display = "none";
+  });
+}
 });
