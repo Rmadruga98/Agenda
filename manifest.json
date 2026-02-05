@@ -2,7 +2,7 @@
   "name": "Barbearia Madruga",
   "short_name": "Madruga",
   "description": "Agendamento online da Barbearia Madruga",
-  "start_url": "/index.html",
+  "start_url": "agendabarbeariamadruga/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -19,5 +19,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "dir": "ltr",
+  "lang": "pt"
 }
