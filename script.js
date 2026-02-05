@@ -46,14 +46,14 @@ function esconderAreaAdmin() {
 
   // ===== PREÇOS =====
 const servicos = {
-  "Corte Degradê": { preco: 35, duracao: 60 },
-  "Corte Navalhado": { preco: 38, duracao: 60 },
+  "Corte Degradê": { preco: 35, duracao: 45 },
+  "Corte Navalhado": { preco: 38, duracao: 50 },
   "Barba": { preco: 20, duracao: 30 },
-  "Corte + Barba": { preco: 55, duracao: 90 },
+  "Corte + Barba": { preco: 55, duracao: 60 },
   "Sobrancelha": { preco: 10, duracao: 15 },
   "Pezinho": { preco: 20, duracao: 15 },
-  "Corte + Barba + Sobrancelha": { preco: 60, duracao: 105 },
-  "Pigmentação + Corte": { preco: 60, duracao: 120 },
+  "Corte + Barba + Sobrancelha": { preco: 60, duracao: 80 },
+  "Pigmentação + Corte": { preco: 60, duracao: 90 },
   "Luzes + Corte": { preco: 75, duracao: 120 },
   "Platinado + Corte": { preco: 110, duracao: 180 }
 };
