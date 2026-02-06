@@ -1,15 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ================= CONFIGURAÇÕES ================= */
+  /* ===== CONFIG ===== */
   const WHATSAPP_BARBEARIA = "5535998066403";
   const SENHA_ADMIN = "madruga123";
   const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
-  /* ================= ELEMENTOS ================= */
+  let adminAtivo = false;
+
+  /* ===== ELEMENTOS ===== */
   const form = document.getElementById("formAgendamento");
   const inputData = document.getElementById("data");
-  const inputHora = document.getElementById("hora"); // hidden
+  const inputHora = document.getElementById("hora");
   const horariosContainer = document.getElementById("horarios");
   const selectServico = document.getElementById("servico");
   const inputPreco = document.getElementById("preco");
@@ -26,21 +28,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const tituloAgenda = document.getElementById("tituloAgenda");
   const tituloHistorico = document.getElementById("tituloHistorico");
 
-  /* ================= SERVIÇOS ================= */
+  /* ===== SERVIÇOS ===== */
   const servicos = {
-    "Corte Degradê": { preco: 35 },
-    "Corte Navalhado": { preco: 38 },
-    "Barba": { preco: 20 },
-    "Corte + Barba": { preco: 55 },
-    "Sobrancelha": { preco: 10 },
-    "Pezinho": { preco: 20 },
-    "Corte + Barba + Sobrancelha": { preco: 60 },
-    "Pigmentação + Corte": { preco: 60 },
-    "Luzes + Corte": { preco: 75 },
-    "Platinado + Corte": { preco: 110 }
+    "Corte Degradê": 35,
+    "Corte Navalhado": 38,
+    "Barba": 20,
+    "Corte + Barba": 55,
+    "Sobrancelha": 10,
+    "Pezinho": 20,
+    "Corte + Barba + Sobrancelha": 60,
+    "Pigmentação + Corte": 60,
+    "Luzes + Corte": 75,
+    "Platinado + Corte": 110
   };
 
-  /* ================= ADMIN ================= */
+  /* ===== ADMIN UI ===== */
   function esconderAdmin() {
     tituloAgenda.style.display = "none";
     listaAgendamentos.style.display = "none";
@@ -61,31 +63,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   esconderAdmin();
 
-  /* ================= HORÁRIOS EM BOTÕES ================= */
-  function renderizarHorarios(dataSelecionada) {
+  /* ===== HORÁRIOS ===== */
+  function renderizarHorarios(data) {
     horariosContainer.innerHTML = "";
     inputHora.value = "";
 
-    const diaSemana = new Date(dataSelecionada + "T00:00").getDay();
-    if (diaSemana === 0 || diaSemana === 1) {
-      alert("Não atendemos aos domingos e segundas-feiras.");
+    const dia = new Date(data + "T00:00").getDay();
+    if (dia === 0 || dia === 1) {
+      mensagem.textContent = "❌ Não atendemos domingo e segunda";
+      mensagem.style.color = "red";
       inputData.value = "";
       return;
     }
 
     const agora = new Date();
-    const agendamentos = JSON.parse(localStorage.getItem("agendamentos")) || [];
+    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
     for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
-      const hora = `${String(h).padStart(2, "0")}:00`;
-      const dataHora = new Date(`${dataSelecionada}T${hora}`);
+      const hora = `${String(h).padStart(2,"0")}:00`;
+      const dataHora = new Date(`${data}T${hora}`);
 
       if (dataHora <= agora) continue;
-
-      const ocupado = agendamentos.some(a =>
-        a.dataISO === dataSelecionada && a.hora === hora
-      );
-      if (ocupado) continue;
+      if (lista.some(a => a.dataISO === data && a.hora === hora)) continue;
 
       const btn = document.createElement("button");
       btn.type = "button";
@@ -93,8 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.textContent = hora;
 
       btn.onclick = () => {
-        document.querySelectorAll(".hora-btn")
-          .forEach(b => b.classList.remove("ativa"));
+        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
         btn.classList.add("ativa");
         inputHora.value = hora;
       };
@@ -104,26 +102,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   inputData.addEventListener("change", () => {
-    if (inputData.value) {
-      renderizarHorarios(inputData.value);
-    }
+    if (inputData.value) renderizarHorarios(inputData.value);
   });
 
-  /* ================= PREÇO AUTOMÁTICO ================= */
+  /* ===== PREÇO ===== */
   selectServico.addEventListener("change", () => {
-    if (servicos[selectServico.value]) {
-      inputPreco.value = `R$ ${servicos[selectServico.value].preco}`;
-    }
+    inputPreco.value = `R$ ${servicos[selectServico.value] || ""}`;
   });
 
-  /* ================= FORMATAR DATA ================= */
-  function formatarData(dataISO) {
+  /* ===== FORMATAR DATA ===== */
+  function formatarData(d) {
     const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-    const d = new Date(dataISO + "T00:00");
-    return `${dias[d.getDay()]} • ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+    const dt = new Date(d + "T00:00");
+    return `${dias[dt.getDay()]} • ${dt.toLocaleDateString("pt-BR")}`;
   }
 
-  /* ================= SUBMIT ================= */
+  /* ===== SUBMIT ===== */
   form.addEventListener("submit", e => {
     e.preventDefault();
     if (!inputHora.value) return alert("Selecione um horário");
@@ -135,18 +129,24 @@ document.addEventListener("DOMContentLoaded", () => {
       data: formatarData(inputData.value),
       hora: inputHora.value,
       servico: selectServico.value,
-      preco: servicos[selectServico.value].preco
+      preco: servicos[selectServico.value]
     };
 
     const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
     lista.push(agendamento);
     localStorage.setItem("agendamentos", JSON.stringify(lista));
 
+    window.open(`https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(
+`📌 NOVO AGENDAMENTO
+👤 ${agendamento.nome}
+📞 ${agendamento.telefone}
+📅 ${agendamento.data}
+⏰ ${agendamento.hora}
+✂️ ${agendamento.servico}
+💰 R$ ${agendamento.preco}`)}`, "_blank");
+
     mensagem.textContent = "✅ Agendamento confirmado!";
     mensagem.style.color = "lime";
-
-    enviarWhatsappCliente(agendamento);
-    enviarWhatsappBarbearia(agendamento);
 
     form.reset();
     inputPreco.value = "";
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarAgendamentos();
   });
 
-  /* ================= LISTAGEM ================= */
+  /* ===== LISTAGEM ===== */
   function carregarAgendamentos() {
     listaAgendamentos.innerHTML = "";
     listaHistorico.innerHTML = "";
@@ -162,94 +162,70 @@ document.addEventListener("DOMContentLoaded", () => {
     const agora = new Date();
     const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
-    lista
-      .sort((a,b)=>new Date(`${a.dataISO}T${a.hora}`)-new Date(`${b.dataISO}T${b.hora}`))
-      .forEach(a=>{
-        const dh = new Date(`${a.dataISO}T${a.hora}`);
-        const li = document.createElement("li");
-        li.textContent = `${a.data} | ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}`;
+    lista.forEach((a, i) => {
+      const dh = new Date(`${a.dataISO}T${a.hora}`);
+      const li = document.createElement("li");
+      li.textContent = `${a.data} | ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}`;
 
-        dh > agora
-          ? listaAgendamentos.appendChild(li)
-          : (li.classList.add("realizado"), listaHistorico.appendChild(li));
-      });
-  }
-
-  /* ================= WHATSAPP ================= */
-  function enviarWhatsappCliente(a) {
-    const tel = a.telefone.replace(/\D/g,"");
-    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(
-`💈 Barbearia Madruga
-📅 ${a.data}
-⏰ ${a.hora}
-✂️ ${a.servico}
-💰 R$ ${a.preco}`)}`, "_blank");
-  }
-
-  function enviarWhatsappBarbearia(a) {
-    window.open(`https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(
-`📌 NOVO AGENDAMENTO
-👤 ${a.nome}
-📞 ${a.telefone}
-📅 ${a.data}
-⏰ ${a.hora}
-✂️ ${a.servico}
-💰 R$ ${a.preco}`)}`, "_blank");
-  }
-
-  /* ================= LIMPAR HISTÓRICO ANTIGO ================= */
-  btnLimparHistorico.addEventListener("click", () => {
-    if (!confirm("Apagar apenas atendimentos antigos?")) return;
-
-    const agora = new Date();
-    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
-    const nova = lista.filter(a =>
-      new Date(`${a.dataISO}T${a.hora}`) > agora
-    );
-
-    localStorage.setItem("agendamentos", JSON.stringify(nova));
-    carregarAgendamentos();
-  });
-
-  /* ================= RELATÓRIO ================= */
-  btnRelatorioDiario.addEventListener("click", ()=>{
-    const hoje = new Date().toDateString();
-    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
-    let total = 0, valor = 0, serv = {};
-
-    lista.forEach(a=>{
-      if (new Date(a.dataISO).toDateString()===hoje){
-        total++; valor+=a.preco;
-        serv[a.servico]=(serv[a.servico]||0)+1;
+      if (dh > agora) {
+        if (adminAtivo) {
+          const btn = document.createElement("button");
+          btn.textContent = "❌";
+          btn.style.marginLeft = "10px";
+          btn.onclick = () => {
+            lista.splice(i, 1);
+            localStorage.setItem("agendamentos", JSON.stringify(lista));
+            carregarAgendamentos();
+          };
+          li.appendChild(btn);
+        }
+        listaAgendamentos.appendChild(li);
+      } else {
+        li.classList.add("realizado");
+        listaHistorico.appendChild(li);
       }
     });
+  }
 
-    let txt="";
-    for(let s in serv) txt+=`• ${s}: ${serv[s]}\n`;
+  /* ===== LIMPAR HISTÓRICO ===== */
+btnLimparHistorico.addEventListener("click", () => {
+  if (!confirm("Apagar apenas atendimentos antigos?")) return;
 
-    window.open(`https://wa.me/${WHATSAPP_BARBEARIA}?text=${encodeURIComponent(
-`📊 RELATÓRIO DO DIA
-👥 ${total}
-💰 R$ ${valor}
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0); // zera horário
 
-✂️ Serviços:
-${txt}`)}`, "_blank");
+  const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+  const novaLista = lista.filter(a => {
+    const dataAg = new Date(a.dataISO + "T00:00");
+    return dataAg >= hoje; // mantém hoje e futuros
   });
 
-  /* ================= ADMIN (3 CLIQUES) ================= */
+  localStorage.setItem("agendamentos", JSON.stringify(novaLista));
+  carregarAgendamentos();
+
+  alert("Histórico antigo apagado com sucesso ✔");
+});
+
+  /* ===== ADMIN ===== */
   let cliques = 0;
-  titulo.addEventListener("click", ()=>{
+  titulo.addEventListener("click", () => {
     cliques++;
     if (cliques === 3) {
       cliques = 0;
-      const senha = prompt("Área restrita:");
-      if (senha !== SENHA_ADMIN) return alert("Senha incorreta");
+      if (prompt("Senha admin:") !== SENHA_ADMIN) return alert("Senha incorreta");
+      adminAtivo = true;
       mostrarAdmin();
-      setTimeout(esconderAdmin, 5 * 60 * 1000);
+      carregarAgendamentos();
+      setTimeout(() => {
+        adminAtivo = false;
+        esconderAdmin();
+        carregarAgendamentos();
+      }, 5 * 60 * 1000);
     }
   });
 
-  /* ================= PWA ================= */
+  /* ===== PWA ===== */
   let deferredPrompt;
   window.addEventListener("beforeinstallprompt", e => {
     e.preventDefault();
@@ -257,9 +233,8 @@ ${txt}`)}`, "_blank");
     btnInstalar.style.display = "block";
   });
 
-  btnInstalar.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
+  btnInstalar.addEventListener("click", () => {
+    deferredPrompt?.prompt();
     deferredPrompt = null;
     btnInstalar.style.display = "none";
   });
