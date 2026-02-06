@@ -189,16 +189,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== LIMPAR HISTÓRICO ===== */
 btnLimparHistorico.addEventListener("click", () => {
-  if (!confirm("Apagar apenas atendimentos antigos?")) return;
+  if (!confirm("Deseja apagar apenas os atendimentos já realizados?")) return;
 
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0); // zera horário
+  const agora = new Date();
 
   const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
   const novaLista = lista.filter(a => {
-    const dataAg = new Date(a.dataISO + "T00:00");
-    return dataAg >= hoje; // mantém hoje e futuros
+    const dataHora = new Date(`${a.dataISO}T${a.hora}`);
+    return dataHora > agora; // mantém apenas futuros
   });
 
   localStorage.setItem("agendamentos", JSON.stringify(novaLista));
