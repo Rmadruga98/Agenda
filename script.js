@@ -79,26 +79,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const agora = new Date();
     const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
-    for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
-      const hora = `${String(h).padStart(2,"0")}:00`;
-      const dataHora = new Date(`${data}T${hora}`);
+   for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
 
-      if (dataHora <= agora) continue;
-      if (lista.some(a => a.dataISO === data && a.hora === hora)) continue;
+  // ⛔ BLOQUEIA 12:00 (almoço)
+  if (h === 12) continue;
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "hora-btn";
-      btn.textContent = hora;
+  const hora = `${String(h).padStart(2, "0")}:00`;
+  const dataHora = new Date(`${data}T${hora}`);
 
-      btn.onclick = () => {
-        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
-        btn.classList.add("ativa");
-        inputHora.value = hora;
-      };
+  if (dataHora <= agora) continue;
 
-      horariosContainer.appendChild(btn);
-    }
+  const ocupado = lista.some(a =>
+    a.dataISO === data && a.hora === hora
+  );
+  if (ocupado) continue;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "hora-btn";
+  btn.textContent = hora;
+
+  btn.onclick = () => {
+    document.querySelectorAll(".hora-btn")
+      .forEach(b => b.classList.remove("ativa"));
+    btn.classList.add("ativa");
+    inputHora.value = hora;
+  };
+
+  horariosContainer.appendChild(btn);
+}
   }
 
   inputData.addEventListener("change", () => {
