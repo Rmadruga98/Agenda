@@ -210,6 +210,37 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Histórico apagado com sucesso ✔");
   });
 
+/* ===== RELATÓRIO DO DIA ===== */
+if (btnRelatorioDiario) {
+  btnRelatorioDiario.addEventListener("click", () => {
+
+    const hoje = new Date().toISOString().split("T")[0];
+    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+
+    const atendimentosHoje = lista.filter(a => a.data === hoje);
+
+    if (atendimentosHoje.length === 0) {
+      alert("Nenhum atendimento registrado para hoje.");
+      return;
+    }
+
+    let total = 0;
+    let texto = `📊 *RELATÓRIO DO DIA*\n📅 ${hoje}\n\n`;
+
+    atendimentosHoje.forEach(a => {
+      texto += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+      total += Number(a.preco);
+    });
+
+    texto += `\n💰 *Total do dia:* R$ ${total}`;
+
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`,
+      "_blank"
+    );
+  });
+}
+
   /* ===== ADMIN LOGIN ===== */
   let cliques = 0;
   titulo.addEventListener("click", () => {
@@ -224,7 +255,29 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+/* ===== PWA - BOTÃO INSTALAR ===== */
+let deferredPrompt;
+const btnInstalar = document.getElementById("btnInstalar");
 
+if (btnInstalar) {
+  btnInstalar.style.display = "none";
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstalar.style.display = "block";
+  });
+
+  btnInstalar.addEventListener("click", () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      btnInstalar.style.display = "none";
+    });
+  });
+}
   carregarAgendamentos();
 
 });
