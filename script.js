@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== ELEMENTOS ===== */
   const form = document.getElementById("formAgendamento");
+  const inputNome = document.getElementById("nome");
+  const inputTelefone = document.getElementById("telefone");
   const inputData = document.getElementById("data");
   const inputHora = document.getElementById("hora");
   const horariosContainer = document.getElementById("horarios");
@@ -79,35 +81,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const agora = new Date();
     const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
-   for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
+    for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
 
-  // ⛔ BLOQUEIA 12:00 (almoço)
-  if (h === 12) continue;
+      if (h === 12) continue; // almoço
 
-  const hora = `${String(h).padStart(2, "0")}:00`;
-  const dataHora = new Date(`${data}T${hora}`);
+      const hora = `${String(h).padStart(2, "0")}:00`;
+      const dataHora = new Date(`${data}T${hora}`);
+      if (dataHora <= agora) continue;
 
-  if (dataHora <= agora) continue;
+      const ocupado = lista.some(a =>
+        a.dataISO === data && a.hora === hora
+      );
+      if (ocupado) continue;
 
-  const ocupado = lista.some(a =>
-    a.dataISO === data && a.hora === hora
-  );
-  if (ocupado) continue;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "hora-btn";
+      btn.textContent = hora;
 
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "hora-btn";
-  btn.textContent = hora;
+      btn.onclick = () => {
+        document.querySelectorAll(".hora-btn")
+          .forEach(b => b.classList.remove("ativa"));
+        btn.classList.add("ativa");
+        inputHora.value = hora;
+      };
 
-  btn.onclick = () => {
-    document.querySelectorAll(".hora-btn")
-      .forEach(b => b.classList.remove("ativa"));
-    btn.classList.add("ativa");
-    inputHora.value = hora;
-  };
-
-  horariosContainer.appendChild(btn);
-}
+      horariosContainer.appendChild(btn);
+    }
   }
 
   inputData.addEventListener("change", () => {
@@ -132,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!inputHora.value) return alert("Selecione um horário");
 
     const agendamento = {
-      nome: nome.value,
-      telefone: telefone.value,
+      nome: inputNome.value,
+      telefone: inputTelefone.value,
       dataISO: inputData.value,
       data: formatarData(inputData.value),
       hora: inputHora.value,
@@ -197,23 +197,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===== LIMPAR HISTÓRICO ===== */
-btnLimparHistorico.addEventListener("click", () => {
-  if (!confirm("Deseja apagar apenas os atendimentos já realizados?")) return;
+  btnLimparHistorico.addEventListener("click", () => {
+    if (!confirm("Deseja apagar apenas os atendimentos já realizados?")) return;
 
-  const agora = new Date();
+    const agora = new Date();
+    const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
 
-  const lista = JSON.parse(localStorage.getItem("agendamentos")) || [];
+    const novaLista = lista.filter(a =>
+      new Date(`${a.dataISO}T${a.hora}`) > agora
+    );
 
-  const novaLista = lista.filter(a => {
-    const dataHora = new Date(`${a.dataISO}T${a.hora}`);
-    return dataHora > agora; // mantém apenas futuros
+    localStorage.setItem("agendamentos", JSON.stringify(novaLista));
+    carregarAgendamentos();
+    alert("Histórico antigo apagado com sucesso ✔");
   });
-
-  localStorage.setItem("agendamentos", JSON.stringify(novaLista));
-  carregarAgendamentos();
-
-  alert("Histórico antigo apagado com sucesso ✔");
-});
 
   /* ===== ADMIN ===== */
   let cliques = 0;
@@ -225,6 +222,7 @@ btnLimparHistorico.addEventListener("click", () => {
       adminAtivo = true;
       mostrarAdmin();
       carregarAgendamentos();
+
       setTimeout(() => {
         adminAtivo = false;
         esconderAdmin();
@@ -234,15 +232,17 @@ btnLimparHistorico.addEventListener("click", () => {
   });
 
   /* ===== PWA ===== */
-  let deferredPrompt;
+  let deferredPrompt = null;
+
   window.addEventListener("beforeinstallprompt", e => {
     e.preventDefault();
     deferredPrompt = e;
-    btnInstalar.style.display = "block";
+    if (btnInstalar) btnInstalar.style.display = "block";
   });
 
-  btnInstalar.addEventListener("click", () => {
-    deferredPrompt?.prompt();
+  btnInstalar?.addEventListener("click", () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
     deferredPrompt = null;
     btnInstalar.style.display = "none";
   });

@@ -6,15 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/Agenda/manifest.json">
   <meta name="theme-color" content="#1c1c1c">
-  <link rel="icon" href="logo.png">
+  <link rel="icon" href="/Agenda/logo-192.png">
 
-  <!-- Font -->
+  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/Agenda/style.css">
 </head>
 
 <body>
@@ -22,13 +22,14 @@
   <div class="container">
 
     <div class="logo-wrapper">
-      <img src="logo.png" alt="Logo Barbearia Madruga" class="logo">
+      <img src="/Agenda/logo-192.png" alt="Logo Barbearia Madruga" class="logo">
     </div>
 
     <h1>Agendamento Online 💈</h1>
+
     <button id="btnInstalar" class="btn-instalar">
-  📲 Instalar aplicativo
-</button>
+      📲 Instalar aplicativo
+    </button>
 
     <h3 class="barber-nome">Barber Madruga</h3>
     <p class="barbeiro-nome">Barbeiro Ricardo</p>
@@ -39,45 +40,48 @@
       <input type="text" id="nome" required>
 
       <label for="telefone">WhatsApp (DDD + número):</label>
-      <input type="tel" id="telefone" pattern="\d{2}\d{4,5}\d{4}" required placeholder="Ex: 11987654321">
+      <input
+        type="tel"
+        id="telefone"
+        pattern="\d{2}\d{4,5}\d{4}"
+        required
+        placeholder="Ex: 11987654321"
+      >
 
       <label for="data">Data:</label>
       <input type="date" id="data" required>
 
-<label>Horário:</label>
+      <label>Horário:</label>
+      <div id="horarios" class="horarios"></div>
+      <input type="hidden" id="hora" required>
 
-<div id="horarios" class="horarios"></div>
-
-<input type="hidden" id="hora" required>
-
-<label for="servico">Serviço:</label>
-<select id="servico" required>
-  <option value="" disabled selected>Selecione um serviço</option>
-
-  <option value="Corte Degradê">Corte Degradê</option>
-  <option value="Corte Navalhado">Corte Navalhado</option>
-  <option value="Barba">Barba</option>
-  <option value="Corte + Barba">Corte + Barba</option>
-  <option value="Sobrancelha">Sobrancelha</option>
-  <option value="Pezinho">Pezinho</option>
-  <option value="Corte + Barba + Sobrancelha">
-    Corte + Barba + Sobrancelha
-  </option>
-  <option value="Pigmentação + Corte">Pigmentação + Corte</option>
-  <option value="Luzes + Corte">Luzes + Corte</option>
-  <option value="Platinado + Corte">Platinado + Corte</option>
-</select>
+      <label for="servico">Serviço:</label>
+      <select id="servico" required>
+        <option value="" disabled selected>Selecione um serviço</option>
+        <option value="Corte Degradê">Corte Degradê</option>
+        <option value="Corte Navalhado">Corte Navalhado</option>
+        <option value="Barba">Barba</option>
+        <option value="Corte + Barba">Corte + Barba</option>
+        <option value="Sobrancelha">Sobrancelha</option>
+        <option value="Pezinho">Pezinho</option>
+        <option value="Corte + Barba + Sobrancelha">
+          Corte + Barba + Sobrancelha
+        </option>
+        <option value="Pigmentação + Corte">Pigmentação + Corte</option>
+        <option value="Luzes + Corte">Luzes + Corte</option>
+        <option value="Platinado + Corte">Platinado + Corte</option>
+      </select>
 
       <label for="preco">Preço (R$):</label>
       <input type="text" id="preco" readonly placeholder="Preço (R$)">
 
       <button type="submit">Agendar</button>
-    
+
     </form>
 
     <p id="mensagem"></p>
 
-    <!-- 🔐 ÁREA ADMIN (controlada pelo JS) -->
+    <!-- 🔐 ÁREA ADMIN (controlada via JS) -->
     <h2 id="tituloAgenda">Agenda Ativa</h2>
     <ul id="listaAgendamentos"></ul>
 
@@ -100,15 +104,16 @@
   </div>
 
   <!-- JS -->
-  <script src="script.js"></script>
+  <script src="/Agenda/script.js"></script>
 
   <!-- Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js")
-          .then(() => console.log("Service Worker registrado"))
-          .catch(err => console.error("Erro no SW:", err));
+        navigator.serviceWorker
+          .register("/Agenda/service-worker.js")
+          .then(() => console.log("Service Worker registrado com sucesso"))
+          .catch(err => console.error("Erro ao registrar SW:", err));
       });
     }
   </script>

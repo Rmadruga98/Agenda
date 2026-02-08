@@ -1,9 +1,14 @@
-const CACHE_NAME = "madruga-agenda-v3"; const FILES_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/script.js",
-  "/manifest.json"
+const CACHE_NAME = "madruga-agenda-v4";
+const REPO = "/Agenda";
+
+const FILES_TO_CACHE = [
+  `${REPO}/`,
+  `${REPO}/index.html`,
+  `${REPO}/style.css`,
+  `${REPO}/script.js`,
+  `${REPO}/manifest.json`,
+  `${REPO}/logo-192.png`,
+  `${REPO}/logo-512.png`
 ];
 
 self.addEventListener("install", event => {
