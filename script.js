@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const HORA_FECHAMENTO = 19;
 
   const servicos = {
+    "Corte Simoles": 30,
     "Corte Degradê": 35,
     "Corte Navalhado": 38,
     "Barba": 20,
