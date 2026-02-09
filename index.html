@@ -5,20 +5,15 @@
   <title>Agendamento - Barbearia Madruga</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1c1c">
   <link rel="icon" href="logo.png">
 
-  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
 <div class="container">
 
   <div class="logo-wrapper">
@@ -33,7 +28,6 @@
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
   <form id="formAgendamento">
-
     <label>Nome:</label>
     <input id="nome" required>
 
@@ -76,7 +70,7 @@
     <h2>📋 Agenda Ativa</h2>
     <ul id="listaAgendamentos"></ul>
 
-    <h2>📚 Histórico de Atendimentos</h2>
+    <h2>📚 Histórico</h2>
     <ul id="listaHistorico"></ul>
 
     <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
@@ -89,7 +83,7 @@
 
 </div>
 
-<!-- Firebase COMPAT -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 

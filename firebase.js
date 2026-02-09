@@ -1,6 +1,5 @@
-// Firebase config
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
+  apiKey: "SUA_API_KEY_REAL",
   authDomain: "barbearia-madruga-oficial.firebaseapp.com",
   projectId: "barbearia-madruga-oficial",
   storageBucket: "barbearia-madruga-oficial.appspot.com",
@@ -9,6 +8,5 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 window.db = db;

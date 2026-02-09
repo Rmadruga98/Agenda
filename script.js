@@ -22,13 +22,12 @@ const servicos = {
 const $ = id => document.getElementById(id);
 const db = window.db;
 
-const horarios = $("horarios");
+const horariosDiv = $("horarios");
 const horaInput = $("hora");
 const dataInput = $("data");
 const precoInput = $("preco");
 const form = $("formAgendamento");
 
-/* PREÇO */
 $("servico").onchange = e => {
   precoInput.value = servicos[e.target.value]
     ? `R$ ${servicos[e.target.value]}`
@@ -37,7 +36,7 @@ $("servico").onchange = e => {
 
 /* HORÁRIOS */
 async function carregarHorarios(data) {
-  horarios.innerHTML = "";
+  horariosDiv.innerHTML = "";
   horaInput.value = "";
 
   const dia = new Date(data + "T00:00").getDay();
@@ -70,7 +69,7 @@ async function carregarHorarios(data) {
       horaInput.value = hora;
     };
 
-    horarios.appendChild(btn);
+    horariosDiv.appendChild(btn);
   }
 }
 
@@ -94,13 +93,9 @@ form.onsubmit = async e => {
 
   await db.collection("agendamentos").add(ag);
 
-  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-    `📌 AGENDAMENTO\n👤 ${ag.nome}\n📅 ${ag.data}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}`
-  )}`);
-
   alert("Agendamento confirmado!");
   form.reset();
-  horarios.innerHTML = "";
+  horariosDiv.innerHTML = "";
   precoInput.value = "";
 };
 
@@ -111,10 +106,10 @@ const btnSair = $("btnSairAdmin");
 const listaAg = $("listaAgendamentos");
 const listaHist = $("listaHistorico");
 
-let clicks = 0;
+let taps = 0;
 $("h1").onclick = () => {
-  clicks++;
-  if (clicks === 5) {
+  taps++;
+  if (taps === 5) {
     btnAdmin.style.display = "block";
     alert("Modo administrador liberado");
   }

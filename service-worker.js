@@ -1,7 +1,6 @@
-const CACHE = "agenda-madruga-v11";
+const CACHE = "agenda-madruga-v1";
 
 self.addEventListener("install", () => self.skipWaiting());
-
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys().then(keys =>
