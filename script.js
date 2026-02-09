@@ -146,38 +146,55 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAdmin.style.display = "block";
   };
 
-  async function carregarAdmin() {
-    listaAg.innerHTML = "";
-    listaHist.innerHTML = "";
+ async function carregarAdmin() {
+  listaAg.innerHTML = "";
+  listaHist.innerHTML = "";
 
-    const hoje = new Date();
-    hoje.setHours(0,0,0,0);
+  const agora = new Date();
 
-    const snap = await db.collection("agendamentos").get();
+  const snap = await db
+    .collection("agendamentos")
+    .orderBy("data")
+    .orderBy("hora")
+    .get();
 
-    snap.forEach(doc => {
-      const a = doc.data();
-      const dh = new Date(`${a.data}T${a.hora}`);
-      const li = document.createElement("li");
-
-      li.innerHTML = `📅 ${a.data} ⏰ ${a.hora}<br>👤 ${a.nome}<br>✂️ ${a.servico} — R$ ${a.preco}`;
-
-      if (dh >= hoje) {
-        const btn = document.createElement("button");
-        btn.textContent = "❌ Remover";
-        btn.onclick = async () => {
-          if (!confirm("Remover agendamento?")) return;
-          await db.collection("agendamentos").doc(doc.id).delete();
-          carregarAdmin();
-        };
-        li.appendChild(btn);
-        listaAg.appendChild(li);
-      } else {
-        li.style.opacity = "0.6";
-        listaHist.appendChild(li);
-      }
-    });
+  if (snap.empty) {
+    listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
+    return;
   }
+
+  snap.forEach(doc => {
+    const a = doc.data();
+    const dataHora = new Date(`${a.data}T${a.hora}`);
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      📅 ${a.data} ⏰ ${a.hora}<br>
+      👤 ${a.nome}<br>
+      ✂️ ${a.servico} — R$ ${a.preco}
+    `;
+
+    if (dataHora >= agora) {
+      // 👉 AGENDA ATIVA
+      const btn = document.createElement("button");
+      btn.textContent = "❌ Remover";
+      btn.style.marginTop = "6px";
+
+      btn.onclick = async () => {
+        if (!confirm("Remover este agendamento?")) return;
+        await db.collection("agendamentos").doc(doc.id).delete();
+        carregarAdmin();
+      };
+
+      li.appendChild(btn);
+      listaAg.appendChild(li);
+    } else {
+      // 👉 HISTÓRICO
+      li.style.opacity = "0.6";
+      listaHist.appendChild(li);
+    }
+  });
+}
 
   /* RELATÓRIO */
   $("btnRelatorioDiario").onclick = async () => {
