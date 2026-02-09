@@ -1,4 +1,4 @@
-// Firebase config (CDN COMPAT)
+// Firebase config (SEU PROJETO)
 const firebaseConfig = {
   apiKey: "AIzaSyDiAv_3P2Zo94WDiiEBazTc8p68m9_jlJE",
   authDomain: "barbearia-madruga-oficial.firebaseapp.com",
@@ -11,8 +11,19 @@ const firebaseConfig = {
 // Inicializa Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Firestore
+// Auth + Firestore
+const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Disponível global
+// Login anônimo (OBRIGATÓRIO)
+auth.signInAnonymously()
+  .then(() => {
+    console.log("✅ Login anônimo OK");
+  })
+  .catch(err => {
+    console.error("❌ Erro login anônimo:", err);
+  });
+
+// Disponível globalmente
+window.auth = auth;
 window.db = db;
