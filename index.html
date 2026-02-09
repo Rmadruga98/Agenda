@@ -60,17 +60,17 @@
     <label>Preço:</label>
     <input id="preco" readonly>
 
-    <button type="submit">Agendar</button>
+    <button>Agendar</button>
   </form>
 
   <!-- ADMIN -->
   <button id="btnAdmin" style="display:none;">🔒 Área do Administrador</button>
 
   <div id="areaAdmin" style="display:none;">
-    <h2 class="titulo-admin agenda">📋 Agenda Ativa</h2>
+    <h2>📋 Agenda Ativa</h2>
     <ul id="listaAgendamentos"></ul>
 
-    <h2 class="titulo-admin historico">📚 Histórico</h2>
+    <h2>📚 Histórico</h2>
     <ul id="listaHistorico"></ul>
 
     <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
@@ -80,13 +80,7 @@
   <footer class="rodape">
     © 2026 • Barber Madruga
   </footer>
-
 </div>
-
-<!-- 🔊 Som confirmação -->
-<audio id="somConfirmacao" preload="auto">
-  <source src="confirmacao.mp3" type="audio/mpeg">
-</audio>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -101,6 +95,5 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
-
 </body>
 </html>

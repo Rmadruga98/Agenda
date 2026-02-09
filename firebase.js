@@ -1,6 +1,5 @@
 const firebaseConfig = {
-  
-    apiKey: "AIzaSyDiAv_3P2Zo94WDiiEBazTc8p68m9_jlJE",
+ apiKey: "AIzaSyDiAv_3P2Zo94WDiiEBazTc8p68m9_jlJE",
   authDomain: "barbearia-madruga-oficial.firebaseapp.com",
   projectId: "barbearia-madruga-oficial",
   storageBucket: "barbearia-madruga-oficial.appspot.com",
@@ -10,7 +9,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-firebase.auth().signInAnonymously().catch(() => {});
+firebase.auth().signInAnonymously();
 
-const db = firebase.firestore();
-window.db = db;
+window.db = firebase.firestore();
