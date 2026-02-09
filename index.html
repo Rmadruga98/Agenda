@@ -22,58 +22,52 @@
 <div class="container">
 
   <div class="logo-wrapper">
-    <img src="logo.png" alt="Logo Barbearia Madruga" class="logo">
+    <img src="logo.png" class="logo">
   </div>
 
   <h1>Agendamento Online 💈</h1>
 
-  <button id="btnInstalar" class="btn-instalar" style="display:none;">
-    📲 Instalar aplicativo
-  </button>
+  <button id="btnInstalar" class="btn-instalar">📲 Instalar aplicativo</button>
 
   <h3 class="barber-nome">Barber Madruga</h3>
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
   <form id="formAgendamento">
 
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" required>
+    <label>Nome:</label>
+    <input id="nome" required>
 
-    <label for="telefone">WhatsApp:</label>
-    <input type="tel" id="telefone" required placeholder="11999999999">
+    <label>WhatsApp:</label>
+    <input id="telefone" required placeholder="11999999999">
 
-    <label for="data">Data:</label>
+    <label>Data:</label>
     <input type="date" id="data" required>
 
     <label>Horário:</label>
     <div id="horarios" class="horarios"></div>
-    <input type="hidden" id="hora" required>
+    <input type="hidden" id="hora">
 
-    <label for="servico">Serviço:</label>
+    <label>Serviço:</label>
     <select id="servico" required>
-      <option value="" disabled selected>Selecione</option>
-      <option value="Corte Simples">Corte Simples</option>
-      <option value="Corte Degradê">Corte Degradê</option>
-      <option value="Corte Navalhado">Corte Navalhado</option>
-      <option value="Barba">Barba</option>
-      <option value="Corte + Barba">Corte + Barba</option>
+      <option disabled selected>Selecione</option>
+      <option>Corte Simples</option>
+      <option>Corte Degradê</option>
+      <option>Corte Navalhado</option>
+      <option>Barba</option>
+      <option>Corte + Barba</option>
+      <option>Sobrancelha</option>
+      <option>Pezinho</option>
+      <option>Corte + Barba + Sobrancelha</option>
+      <option>Pigmentação + Corte</option>
+      <option>Luzes + Corte</option>
+      <option>Platinado + Corte</option>
     </select>
 
-    <label for="preco">Preço:</label>
-    <input type="text" id="preco" readonly>
+    <label>Preço:</label>
+    <input id="preco" readonly>
 
-    <button type="submit">Agendar</button>
+    <button>Agendar</button>
   </form>
-
-  <!-- ADMIN -->
-  <h2 id="tituloAgenda">Agenda Ativa</h2>
-  <ul id="listaAgendamentos"></ul>
-
-  <h2 id="tituloHistorico">Histórico</h2>
-  <ul id="listaHistorico"></ul>
-
-  <button id="btnLimparHistorico">Limpar histórico</button>
-  <button id="btnRelatorioDiario">Enviar relatório</button>
 
   <footer class="rodape">
     © 2026 • Barber Madruga
@@ -81,17 +75,17 @@
 
 </div>
 
-<!-- 🔥 Firebase (MODULAR, CORRETO) -->
-<script type="module" src="firebase.js"></script>
+<!-- Firebase COMPAT (obrigatório nessa ordem) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<!-- Sistema -->
+<script src="firebase.js"></script>
 <script src="script.js"></script>
 
-<!-- Service Worker -->
 <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
 </body>

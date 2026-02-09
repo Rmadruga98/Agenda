@@ -1,17 +1,18 @@
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+// Firebase config
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  projectId: "SEU_PROJETO",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+};
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAFZtBJPQWRv6k3ZbfMWeJCEhAFag67JBc",
-    authDomain: "barbearia-madruga-ba6e2.firebaseapp.com",
-    projectId: "barbearia-madruga-ba6e2",
-    storageBucket: "barbearia-madruga-ba6e2.appspot.com",
-    messagingSenderId: "827262254177",
-    appId: "1:827262254177:web:93e420c86710c0078cfe20"
-  };
+// Inicializa Firebase
+firebase.initializeApp(firebaseConfig);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+// Inicializa Firestore
+const db = firebase.firestore();
 
-  // deixa disponível pro sistema
-  window.db = db;
+// deixa disponível pro script.js
+window.db = db;

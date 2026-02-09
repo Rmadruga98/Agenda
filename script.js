@@ -26,27 +26,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputPreco = $("preco");
   const form = $("formAgendamento");
 
-  /* ===== FIRESTORE ===== */
-  if (!window.db) {
-    alert("❌ Firebase não carregou");
-    return;
-  }
   const db = window.db;
 
-  /* ===== PREÇO ===== */
+  /* PREÇO */
   $("servico").addEventListener("change", e => {
-    const valor = servicos[e.target.value];
-    inputPreco.value = valor ? `R$ ${valor}` : "";
+    inputPreco.value = servicos[e.target.value]
+      ? `R$ ${servicos[e.target.value]}`
+      : "";
   });
 
-  /* ===== HORÁRIOS ===== */
+  /* HORÁRIOS */
   async function renderizarHorarios(data) {
     horariosContainer.innerHTML = "";
     inputHora.value = "";
 
-    const diaSemana = new Date(data + "T00:00").getDay();
-    if (diaSemana === 0 || diaSemana === 1) {
-      alert("❌ Não atendemos domingo e segunda-feira");
+    const dia = new Date(data + "T00:00").getDay();
+    if (dia === 0 || dia === 1) {
+      alert("Não atendemos domingo e segunda");
       inputData.value = "";
       return;
     }
@@ -79,9 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         horariosContainer.appendChild(btn);
       }
+
     } catch (err) {
-      console.error(err);
       alert("Erro ao carregar horários");
+      console.error(err);
     }
   }
 
@@ -89,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inputData.value) renderizarHorarios(inputData.value);
   });
 
-  /* ===== AGENDAR ===== */
+  /* AGENDAR */
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -99,8 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const agendamento = {
-      nome: $("nome").value.trim(),
-      telefone: $("telefone").value.trim(),
+      nome: $("nome").value,
+      telefone: $("telefone").value,
       data: inputData.value,
       hora: inputHora.value,
       servico: $("servico").value,
@@ -108,29 +105,24 @@ document.addEventListener("DOMContentLoaded", () => {
       criadoEm: new Date()
     };
 
-    try {
-      await db.collection("agendamentos").add(agendamento);
+    await db.collection("agendamentos").add(agendamento);
 
-      window.open(
-        `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
 `📌 NOVO AGENDAMENTO
 👤 ${agendamento.nome}
 📅 ${agendamento.data}
 ⏰ ${agendamento.hora}
 ✂️ ${agendamento.servico}
 💰 R$ ${agendamento.preco}`
-        )}`
-      );
+      )}`,
+      "_blank"
+    );
 
-      alert("✅ Agendamento confirmado!");
-      form.reset();
-      horariosContainer.innerHTML = "";
-      inputPreco.value = "";
-
-    } catch (err) {
-      console.error(err);
-      alert("❌ Erro ao salvar agendamento");
-    }
+    alert("Agendamento confirmado!");
+    form.reset();
+    horariosContainer.innerHTML = "";
+    inputPreco.value = "";
   });
 
 });
