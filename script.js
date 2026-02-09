@@ -28,14 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const precoInput = $("preco");
   const form = $("formAgendamento");
 
-  /* PREÇO */
-  $("servico").addEventListener("change", e => {
+  $("servico").onchange = e => {
     precoInput.value = servicos[e.target.value]
       ? `R$ ${servicos[e.target.value]}`
       : "";
-  });
+  };
 
-  /* HORÁRIOS */
   async function carregarHorarios(data) {
     horariosDiv.innerHTML = "";
     horaInput.value = "";
@@ -47,12 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const snapshot = await db
-      .collection("agendamentos")
+    const snap = await db.collection("agendamentos")
       .where("data", "==", data)
       .get();
 
-    const ocupados = snapshot.docs.map(d => d.data().hora);
+    const ocupados = snap.docs.map(d => d.data().hora);
 
     for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
       if (h === 12) continue;
@@ -66,8 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.textContent = hora;
 
       btn.onclick = () => {
-        document.querySelectorAll(".hora-btn")
-          .forEach(b => b.classList.remove("ativa"));
+        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
         btn.classList.add("ativa");
         horaInput.value = hora;
       };
@@ -76,18 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  dataInput.addEventListener("change", () => {
+  dataInput.onchange = () => {
     if (dataInput.value) carregarHorarios(dataInput.value);
-  });
+  };
 
-  /* AGENDAR */
-  form.addEventListener("submit", async e => {
+  form.onsubmit = async e => {
     e.preventDefault();
-
-    if (!horaInput.value) {
-      alert("Selecione um horário");
-      return;
-    }
+    if (!horaInput.value) return alert("Selecione um horário");
 
     const ag = {
       nome: $("nome").value,
@@ -103,101 +94,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-`📌 NOVO AGENDAMENTO
-👤 ${ag.nome}
-📅 ${ag.data}
-⏰ ${ag.hora}
-✂️ ${ag.servico}
-💰 R$ ${ag.preco}`
-      )}`,
-      "_blank"
+        `📌 NOVO AGENDAMENTO\n👤 ${ag.nome}\n📅 ${ag.data}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}`
+      )}`
     );
 
     alert("Agendamento confirmado!");
     form.reset();
     horariosDiv.innerHTML = "";
     precoInput.value = "";
-  });
+  };
 
-  /* ADMIN */
+  // ===== ADMIN =====
+
   const btnAdmin = $("btnAdmin");
   const areaAdmin = $("areaAdmin");
-  const btnSairAdmin = $("btnSairAdmin");
+  const btnSair = $("btnSairAdmin");
   const listaAg = $("listaAgendamentos");
   const listaHist = $("listaHistorico");
+  const btnRel = $("btnRelatorioDiario");
 
-  let clicks = 0;
+  let taps = 0;
   document.querySelector("h1").onclick = () => {
-    if (++clicks === 5) {
+    taps++;
+    if (taps === 5) {
       btnAdmin.style.display = "block";
       alert("Modo administrador liberado");
     }
   };
 
-  btnAdmin.onclick = async () => {
+  btnAdmin.onclick = () => {
     if (prompt("Senha admin:") !== SENHA_ADMIN) return alert("Senha incorreta");
     areaAdmin.style.display = "block";
     btnAdmin.style.display = "none";
     carregarAdmin();
   };
 
-  btnSairAdmin.onclick = () => {
+  btnSair.onclick = () => {
     areaAdmin.style.display = "none";
     btnAdmin.style.display = "block";
   };
 
- async function carregarAdmin() {
-  listaAg.innerHTML = "";
-  listaHist.innerHTML = "";
+  async function carregarAdmin() {
+    listaAg.innerHTML = "";
+    listaHist.innerHTML = "";
 
-  const agora = new Date();
+    const hoje = new Date().toISOString().split("T")[0];
+    const snap = await db.collection("agendamentos").get();
 
-  const snap = await db
-    .collection("agendamentos")
-    .orderBy("data")
-    .orderBy("hora")
-    .get();
+    snap.forEach(doc => {
+      const a = doc.data();
+      const li = document.createElement("li");
+      li.innerHTML = `📅 ${a.data} ⏰ ${a.hora}<br>👤 ${a.nome}<br>✂️ ${a.servico} — R$ ${a.preco}`;
 
-  if (snap.empty) {
-    listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
-    return;
+      if (a.data >= hoje) {
+        const btn = document.createElement("button");
+        btn.textContent = "🗑 Remover";
+        btn.onclick = async () => {
+          if (confirm("Excluir agendamento?")) {
+            await db.collection("agendamentos").doc(doc.id).delete();
+            carregarAdmin();
+          }
+        };
+        li.appendChild(btn);
+        listaAg.appendChild(li);
+      } else {
+        li.style.opacity = "0.6";
+        listaHist.appendChild(li);
+      }
+    });
   }
 
-  snap.forEach(doc => {
-    const a = doc.data();
-    const dataHora = new Date(`${a.data}T${a.hora}`);
-
-    const li = document.createElement("li");
-    li.innerHTML = `
-      📅 ${a.data} ⏰ ${a.hora}<br>
-      👤 ${a.nome}<br>
-      ✂️ ${a.servico} — R$ ${a.preco}
-    `;
-
-    if (dataHora >= agora) {
-      // 👉 AGENDA ATIVA
-      const btn = document.createElement("button");
-      btn.textContent = "❌ Remover";
-      btn.style.marginTop = "6px";
-
-      btn.onclick = async () => {
-        if (!confirm("Remover este agendamento?")) return;
-        await db.collection("agendamentos").doc(doc.id).delete();
-        carregarAdmin();
-      };
-
-      li.appendChild(btn);
-      listaAg.appendChild(li);
-    } else {
-      // 👉 HISTÓRICO
-      li.style.opacity = "0.6";
-      listaHist.appendChild(li);
-    }
-  });
-}
-
-  /* RELATÓRIO */
-  $("btnRelatorioDiario").onclick = async () => {
+  btnRel.onclick = async () => {
     const hoje = new Date().toISOString().split("T")[0];
     const snap = await db.collection("agendamentos").where("data", "==", hoje).get();
     if (snap.empty) return alert("Nenhum atendimento hoje");
@@ -205,14 +172,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let total = 0;
     let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
 
-    snap.docs.map(d => d.data()).sort((a,b)=>a.hora.localeCompare(b.hora))
-      .forEach(a => {
-        txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
-        total += Number(a.preco);
-      });
+    snap.forEach(d => {
+      const a = d.data();
+      txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+      total += Number(a.preco);
+    });
 
     txt += `\n💰 Total: R$ ${total}`;
-
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
   };
 

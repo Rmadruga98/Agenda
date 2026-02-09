@@ -1,5 +1,4 @@
-// firebase.js
-
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDiAv_3P2Zo94WDiiEBazTc8p68m9_jlJE",
   authDomain: "barbearia-madruga-oficial.firebaseapp.com",
@@ -9,6 +8,9 @@ const firebaseConfig = {
   appId: "1:364300779378:web:84d38ff82ca410cbfee7eb"
 };
 
+// Inicializa Firebase
 firebase.initializeApp(firebaseConfig);
 
-window.db = firebase.firestore();
+// Firestore
+const db = firebase.firestore();
+window.db = db;
