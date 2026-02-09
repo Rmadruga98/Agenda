@@ -225,3 +225,29 @@ button:hover {
   color: #000;
   border-color: #f5b400;
 }
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.hora-btn {
+  pointer-events: auto !important;
+  z-index: 10;
+  position: relative;
+
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #333;
+  background: #1c1c1c;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.hora-btn.ativa {
+  background: #1e90ff;
+  border-color: #1e90ff;
+  color: #fff;
+}

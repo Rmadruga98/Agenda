@@ -61,11 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.className = "hora-btn";
       btn.textContent = hora;
 
-      btn.onclick = () => {
-        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
-        btn.classList.add("ativa");
-        horaInput.value = hora;
-      };
+      btn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  document.querySelectorAll(".hora-btn")
+    .forEach(b => b.classList.remove("ativa"));
+
+  btn.classList.add("ativa");
+  horaInput.value = hora;
+
+  console.log("Horário selecionado:", hora);
+});
 
       horariosDiv.appendChild(btn);
     }
