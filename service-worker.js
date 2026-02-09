@@ -1,4 +1,4 @@
-const CACHE = "agenda-madruga-v8";
+const CACHE = "agenda-madruga-v8.1";
 
 self.addEventListener("install", () => self.skipWaiting());
 
