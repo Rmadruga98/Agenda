@@ -138,22 +138,30 @@ document.addEventListener("DOMContentLoaded", () => {
     listaAg.innerHTML = "";
     listaHist.innerHTML = "";
 
-    const hoje = new Date().toISOString().split("T")[0];
-    const snap = await db.collection("agendamentos").get();
+    const agora = new Date();
+    agora.setSeconds(0, 0);
 
-    snap.forEach(doc => {
+    const snapshot = await db.collection("agendamentos").get();
+
+    snapshot.forEach(doc => {
       const a = doc.data();
-      const li = document.createElement("li");
-      li.innerHTML = `📅 ${a.data} ⏰ ${a.hora}<br>👤 ${a.nome}<br>✂️ ${a.servico} — R$ ${a.preco}`;
+      const [ano, mes, dia] = a.data.split("-").map(Number);
+      const [h, m] = a.hora.split(":").map(Number);
+      const dataHora = new Date(ano, mes - 1, dia, h, m);
 
-      if (a.data >= hoje) {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        📅 ${a.data} ⏰ ${a.hora}<br>
+        👤 ${a.nome}<br>
+        ✂️ ${a.servico} — R$ ${a.preco}
+      `;
+
+      if (dataHora >= agora) {
         const btn = document.createElement("button");
-        btn.textContent = "🗑 Remover";
+        btn.textContent = "❌ Remover";
         btn.onclick = async () => {
-          if (confirm("Excluir agendamento?")) {
-            await db.collection("agendamentos").doc(doc.id).delete();
-            carregarAdmin();
-          }
+          await db.collection("agendamentos").doc(doc.id).delete();
+          carregarAdmin();
         };
         li.appendChild(btn);
         listaAg.appendChild(li);
@@ -164,22 +172,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  btnRel.onclick = async () => {
-    const hoje = new Date().toISOString().split("T")[0];
-    const snap = await db.collection("agendamentos").where("data", "==", hoje).get();
-    if (snap.empty) return alert("Nenhum atendimento hoje");
+  if (btnRel) {
+    btnRel.onclick = async () => {
+      const hoje = new Date().toISOString().split("T")[0];
+      const snap = await db.collection("agendamentos").where("data", "==", hoje).get();
+      if (snap.empty) return alert("Nenhum atendimento hoje");
 
-    let total = 0;
-    let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
+      let total = 0;
+      let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
 
-    snap.forEach(d => {
-      const a = d.data();
-      txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
-      total += Number(a.preco);
-    });
+      snap.forEach(d => {
+        const a = d.data();
+        txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+        total += Number(a.preco);
+      });
 
-    txt += `\n💰 Total: R$ ${total}`;
-    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
-  };
+      txt += `\n💰 Total: R$ ${total}`;
+      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
+    };
+  }
 
 });
