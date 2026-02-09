@@ -1,11 +1,12 @@
-const CACHE_NAME = "agenda-madruga-v9";
+const CACHE_NAME = "agenda-madruga-v10";
+
 const FILES_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/script.js",
-  "/manifest.json",
-  "/logo.png"
+  "/Agenda/",
+  "/Agenda/index.html",
+  "/Agenda/style.css",
+  "/Agenda/script.js",
+  "/Agenda/manifest.json",
+  "/Agenda/logo.png"
 ];
 
 self.addEventListener("install", event => {
