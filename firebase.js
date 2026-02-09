@@ -13,4 +13,6 @@ firebase.initializeApp(firebaseConfig);
 
 // Firestore
 const db = firebase.firestore();
+
+// Disponível global
 window.db = db;

@@ -28,28 +28,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const precoInput = $("preco");
   const form = $("formAgendamento");
 
-  $("servico").onchange = e => {
+  // ===== PREÇO =====
+  $("servico").addEventListener("change", e => {
     precoInput.value = servicos[e.target.value]
       ? `R$ ${servicos[e.target.value]}`
       : "";
-  };
+  });
 
+  // ===== HORÁRIOS =====
   async function carregarHorarios(data) {
     horariosDiv.innerHTML = "";
     horaInput.value = "";
 
-    const dia = new Date(data + "T00:00").getDay();
-    if (dia === 0 || dia === 1) {
+    const diaSemana = new Date(data + "T00:00").getDay();
+    if (diaSemana === 0 || diaSemana === 1) {
       alert("Não atendemos domingo e segunda");
       dataInput.value = "";
       return;
     }
 
-    const snap = await db.collection("agendamentos")
+    const snapshot = await db
+      .collection("agendamentos")
       .where("data", "==", data)
       .get();
 
-    const ocupados = snap.docs.map(d => d.data().hora);
+    const ocupados = snapshot.docs.map(d => d.data().hora);
 
     for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
       if (h === 12) continue;
@@ -63,7 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.textContent = hora;
 
       btn.onclick = () => {
-        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
+        document.querySelectorAll(".hora-btn")
+          .forEach(b => b.classList.remove("ativa"));
         btn.classList.add("ativa");
         horaInput.value = hora;
       };
@@ -72,11 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  dataInput.onchange = () => {
+  dataInput.addEventListener("change", () => {
     if (dataInput.value) carregarHorarios(dataInput.value);
-  };
+  });
 
-  form.onsubmit = async e => {
+  // ===== AGENDAR =====
+  form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!horaInput.value) return alert("Selecione um horário");
 
@@ -94,7 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-        `📌 NOVO AGENDAMENTO\n👤 ${ag.nome}\n📅 ${ag.data}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}`
+`📌 NOVO AGENDAMENTO
+👤 ${ag.nome}
+📅 ${ag.data}
+⏰ ${ag.hora}
+✂️ ${ag.servico}
+💰 R$ ${ag.preco}`
       )}`
     );
 
@@ -102,10 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     horariosDiv.innerHTML = "";
     precoInput.value = "";
-  };
+  });
 
   // ===== ADMIN =====
-
   const btnAdmin = $("btnAdmin");
   const areaAdmin = $("areaAdmin");
   const btnSair = $("btnSairAdmin");
@@ -122,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  btnAdmin.onclick = () => {
+  btnAdmin.onclick = async () => {
     if (prompt("Senha admin:") !== SENHA_ADMIN) return alert("Senha incorreta");
     areaAdmin.style.display = "block";
     btnAdmin.style.display = "none";
@@ -134,144 +143,65 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAdmin.style.display = "block";
   };
 
-  function carregarAdmin() {
-  const listaAg = document.getElementById("listaAgendamentos");
-  const listaHist = document.getElementById("listaHistorico");
+  async function carregarAdmin() {
+    listaAg.innerHTML = "";
+    listaHist.innerHTML = "";
 
-  listaAg.innerHTML = "";
-  listaHist.innerHTML = "";
+    const agora = new Date();
+    agora.setSeconds(0, 0);
 
-  const agora = new Date();
-  agora.setSeconds(0, 0);
+    const snapshot = await db.collection("agendamentos").get();
 
-  db.collection("agendamentos")
-    .orderBy("data")
-    .orderBy("hora")
-    .onSnapshot(snapshot => {
+    snapshot.forEach(doc => {
+      const a = doc.data();
 
-      listaAg.innerHTML = "";
-      listaHist.innerHTML = "";
+      const [ano, mes, dia] = a.data.split("-").map(Number);
+      const [h, m] = a.hora.split(":").map(Number);
+      const dataHora = new Date(ano, mes - 1, dia, h, m, 0, 0);
 
-      if (snapshot.empty) {
-        listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
-        return;
+      const li = document.createElement("li");
+      li.innerHTML = `
+        📅 ${a.data} ⏰ ${a.hora}<br>
+        👤 ${a.nome}<br>
+        ✂️ ${a.servico} — R$ ${a.preco}
+      `;
+
+      if (dataHora >= agora) {
+        const btn = document.createElement("button");
+        btn.textContent = "❌ Remover";
+        btn.onclick = async () => {
+          if (!confirm("Remover este agendamento?")) return;
+          await db.collection("agendamentos").doc(doc.id).delete();
+          carregarAdmin();
+        };
+        li.appendChild(btn);
+        listaAg.appendChild(li);
+      } else {
+        li.style.opacity = "0.6";
+        listaHist.appendChild(li);
       }
-
-      snapshot.forEach(doc => {
-        const a = doc.data();
-
-        // 👉 conversão segura (SEM BUG)
-        const [ano, mes, dia] = a.data.split("-").map(Number);
-        const [h, m] = a.hora.split(":").map(Number);
-        const dataHora = new Date(ano, mes - 1, dia, h, m, 0, 0);
-
-        const li = document.createElement("li");
-        li.innerHTML = `
-          📅 ${a.data} ⏰ ${a.hora}<br>
-          👤 ${a.nome}<br>
-          ✂️ ${a.servico} — R$ ${a.preco}
-        `;
-
-        if (dataHora >= agora) {
-          // 🟢 AGENDA ATIVA
-          const btn = document.createElement("button");
-          btn.textContent = "❌ Remover";
-          btn.style.marginTop = "6px";
-
-          btn.onclick = async () => {
-            if (!confirm("Remover este agendamento?")) return;
-            await db.collection("agendamentos").doc(doc.id).delete();
-          };
-
-          li.appendChild(btn);
-          listaAg.appendChild(li);
-
-        } else {
-          // 🔵 HISTÓRICO
-          li.style.opacity = "0.6";
-          listaHist.appendChild(li);
-        }
-      });
     });
-}function carregarAdmin() {
-  const listaAg = document.getElementById("listaAgendamentos");
-  const listaHist = document.getElementById("listaHistorico");
-
-  listaAg.innerHTML = "";
-  listaHist.innerHTML = "";
-
-  const agora = new Date();
-  agora.setSeconds(0, 0);
-
-  db.collection("agendamentos")
-    .orderBy("data")
-    .orderBy("hora")
-    .onSnapshot(snapshot => {
-
-      listaAg.innerHTML = "";
-      listaHist.innerHTML = "";
-
-      if (snapshot.empty) {
-        listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
-        return;
-      }
-
-      snapshot.forEach(doc => {
-        const a = doc.data();
-
-        // 🔥 Conversão 100% segura (sem bug de fuso)
-        const [ano, mes, dia] = a.data.split("-").map(Number);
-        const [h, m] = a.hora.split(":").map(Number);
-        const dataHora = new Date(ano, mes - 1, dia, h, m, 0, 0);
-
-        const li = document.createElement("li");
-        li.innerHTML = `
-          📅 ${a.data} ⏰ ${a.hora}<br>
-          👤 ${a.nome}<br>
-          ✂️ ${a.servico} — R$ ${a.preco}
-        `;
-
-        if (dataHora >= agora) {
-          // 🟢 AGENDA ATIVA
-          const btn = document.createElement("button");
-          btn.textContent = "❌ Remover";
-          btn.style.marginTop = "6px";
-
-          btn.onclick = async () => {
-            if (!confirm("Remover este agendamento?")) return;
-            await db.collection("agendamentos").doc(doc.id).delete();
-          };
-
-          li.appendChild(btn);
-          listaAg.appendChild(li);
-
-        } else {
-          // 🔵 HISTÓRICO
-          li.style.opacity = "0.6";
-          listaHist.appendChild(li);
-        }
-      });
-    });
-}
-
-  if (btnRel) {
-    btnRel.onclick = async () => {
-      const hoje = new Date().toISOString().split("T")[0];
-      const snap = await db.collection("agendamentos").where("data", "==", hoje).get();
-      if (snap.empty) return alert("Nenhum atendimento hoje");
-
-      let total = 0;
-      let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
-
-      snap.forEach(d => {
-        const a = d.data();
-        txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
-        total += Number(a.preco);
-      });
-
-      txt += `\n💰 Total: R$ ${total}`;
-      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
-    };
   }
+
+  btnRel.onclick = async () => {
+    const hoje = new Date().toISOString().split("T")[0];
+    const snap = await db.collection("agendamentos")
+      .where("data", "==", hoje)
+      .get();
+
+    if (snap.empty) return alert("Nenhum atendimento hoje");
+
+    let total = 0;
+    let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
+
+    snap.forEach(d => {
+      const a = d.data();
+      txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+      total += Number(a.preco);
+    });
+
+    txt += `\n💰 Total: R$ ${total}`;
+    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
+  };
 
 });
