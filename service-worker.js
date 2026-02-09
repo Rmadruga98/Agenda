@@ -1,11 +1,11 @@
-const CACHE = "agenda-madruga-v6";
+const CACHE = "agenda-madruga-v7";
 
-self.addEventListener("install", e => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
+self.addEventListener("activate", event => {
+  event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.map(k => caches.delete(k)))
     )

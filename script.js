@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   const WHATSAPP = "5535998066403";
+  const SENHA_ADMIN = "madruga123";
   const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
@@ -20,98 +21,170 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const $ = id => document.getElementById(id);
   const db = window.db;
-  const auth = window.auth;
 
-  const horariosDiv = $("horarios");
-  const dataInput = $("data");
-  const horaInput = $("hora");
-  const precoInput = $("preco");
+  const horariosContainer = $("horarios");
+  const inputHora = $("hora");
+  const inputData = $("data");
+  const inputPreco = $("preco");
+  const form = $("formAgendamento");
 
+  /* ===== PREÇO ===== */
   $("servico").addEventListener("change", e => {
-    precoInput.value = servicos[e.target.value]
+    inputPreco.value = servicos[e.target.value]
       ? `R$ ${servicos[e.target.value]}`
       : "";
   });
 
-  async function carregarHorarios(data) {
-    horariosDiv.innerHTML = "";
-    horaInput.value = "";
+  /* ===== HORÁRIOS ===== */
+  async function renderizarHorarios(data) {
+    horariosContainer.innerHTML = "";
+    inputHora.value = "";
 
     const dia = new Date(data + "T00:00").getDay();
     if (dia === 0 || dia === 1) {
       alert("Não atendemos domingo e segunda");
-      dataInput.value = "";
+      inputData.value = "";
       return;
     }
 
-    const snap = await db.collection("agendamentos")
-      .where("data", "==", data)
-      .get();
+    try {
+      const snapshot = await db
+        .collection("agendamentos")
+        .where("data", "==", data)
+        .get();
 
-    const ocupados = snap.docs.map(d => d.data().hora);
+      const ocupados = snapshot.docs.map(d => d.data().hora);
 
-    for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
-      if (h === 12) continue;
+      for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
+        if (h === 12) continue;
 
-      const hora = `${String(h).padStart(2,"0")}:00`;
-      if (ocupados.includes(hora)) continue;
+        const hora = String(h).padStart(2, "0") + ":00";
+        if (ocupados.includes(hora)) continue;
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "hora-btn";
-      btn.textContent = hora;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "hora-btn";
+        btn.textContent = hora;
 
-      btn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".hora-btn")
+            .forEach(b => b.classList.remove("ativa"));
+          btn.classList.add("ativa");
+          inputHora.value = hora;
+        });
 
-  document.querySelectorAll(".hora-btn")
-    .forEach(b => b.classList.remove("ativa"));
+        horariosContainer.appendChild(btn);
+      }
 
-  btn.classList.add("ativa");
-  horaInput.value = hora;
-
-  console.log("Horário selecionado:", hora);
-});
-
-      horariosDiv.appendChild(btn);
+    } catch (err) {
+      alert("Erro ao carregar horários");
+      console.error(err);
     }
   }
 
-  dataInput.addEventListener("change", () => {
-    if (dataInput.value) carregarHorarios(dataInput.value);
+  inputData.addEventListener("change", () => {
+    if (inputData.value) renderizarHorarios(inputData.value);
   });
 
-  $("formAgendamento").addEventListener("submit", async e => {
+  /* ===== AGENDAR ===== */
+  form.addEventListener("submit", async e => {
     e.preventDefault();
-    if (!horaInput.value) return alert("Selecione um horário");
 
-    const ag = {
+    if (!inputHora.value) {
+      alert("Selecione um horário");
+      return;
+    }
+
+    const agendamento = {
       nome: $("nome").value,
       telefone: $("telefone").value,
-      data: dataInput.value,
-      hora: horaInput.value,
+      data: inputData.value,
+      hora: inputHora.value,
       servico: $("servico").value,
       preco: servicos[$("servico").value],
       criadoEm: new Date()
     };
 
-    await db.collection("agendamentos").add(ag);
+    await db.collection("agendamentos").add(agendamento);
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
 `📌 NOVO AGENDAMENTO
-👤 ${ag.nome}
-📅 ${ag.data}
-⏰ ${ag.hora}
-✂️ ${ag.servico}
-💰 R$ ${ag.preco}`
+👤 ${agendamento.nome}
+📅 ${agendamento.data}
+⏰ ${agendamento.hora}
+✂️ ${agendamento.servico}
+💰 R$ ${agendamento.preco}`
       )}`,
       "_blank"
     );
 
-    alert("Agendado com sucesso!");
-    location.reload();
+    alert("Agendamento confirmado!");
+    form.reset();
+    horariosContainer.innerHTML = "";
+    inputPreco.value = "";
   });
+
+  /* ===== ÁREA ADMIN ===== */
+  const btnAdmin = $("btnAdmin");
+  const areaAdmin = $("areaAdmin");
+  const btnSairAdmin = $("btnSairAdmin");
+  const listaAgendamentos = $("listaAgendamentos");
+
+  let toques = 0;
+  document.querySelector("h1").addEventListener("click", () => {
+    toques++;
+    if (toques === 5) {
+      btnAdmin.style.display = "block";
+      alert("Modo administrador liberado");
+    }
+  });
+
+  btnAdmin.addEventListener("click", async () => {
+    const senha = prompt("Digite a senha do administrador:");
+    if (senha !== SENHA_ADMIN) {
+      alert("Senha incorreta");
+      return;
+    }
+
+    areaAdmin.style.display = "block";
+    btnAdmin.style.display = "none";
+    carregarAgendaAdmin();
+  });
+
+  btnSairAdmin.addEventListener("click", () => {
+    areaAdmin.style.display = "none";
+    btnAdmin.style.display = "block";
+  });
+
+  async function carregarAgendaAdmin() {
+    listaAgendamentos.innerHTML = "";
+
+    const snapshot = await db.collection("agendamentos")
+      .orderBy("data")
+      .orderBy("hora")
+      .get();
+
+    snapshot.forEach(doc => {
+      const a = doc.data();
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        📅 ${a.data} ⏰ ${a.hora}<br>
+        👤 ${a.nome}<br>
+        ✂️ ${a.servico} — R$ ${a.preco}
+        <br>
+        <button data-id="${doc.id}">🗑 Excluir</button>
+      `;
+
+      li.querySelector("button").onclick = async () => {
+        if (!confirm("Excluir este agendamento?")) return;
+        await db.collection("agendamentos").doc(doc.id).delete();
+        carregarAgendaAdmin();
+      };
+
+      listaAgendamentos.appendChild(li);
+    });
+  }
 
 });
