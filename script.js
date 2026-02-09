@@ -22,25 +22,26 @@ const servicos = {
 const $ = id => document.getElementById(id);
 const db = window.db;
 
+/* ================= AGENDAMENTO ================= */
+
 const horariosDiv = $("horarios");
 const horaInput = $("hora");
 const dataInput = $("data");
 const precoInput = $("preco");
 const form = $("formAgendamento");
 
-$("servico").onchange = e => {
+$("servico").addEventListener("change", e => {
   precoInput.value = servicos[e.target.value]
     ? `R$ ${servicos[e.target.value]}`
     : "";
-};
+});
 
-/* HORÁRIOS */
 async function carregarHorarios(data) {
   horariosDiv.innerHTML = "";
   horaInput.value = "";
 
-  const dia = new Date(data + "T00:00").getDay();
-  if (dia === 0 || dia === 1) {
+  const diaSemana = new Date(data + "T00:00").getDay();
+  if (diaSemana === 0 || diaSemana === 1) {
     alert("Não atendemos domingo e segunda");
     dataInput.value = "";
     return;
@@ -73,12 +74,11 @@ async function carregarHorarios(data) {
   }
 }
 
-dataInput.onchange = () => {
+dataInput.addEventListener("change", () => {
   if (dataInput.value) carregarHorarios(dataInput.value);
-};
+});
 
-/* AGENDAR */
-form.onsubmit = async e => {
+form.addEventListener("submit", async e => {
   e.preventDefault();
   if (!horaInput.value) return alert("Selecione um horário");
 
@@ -88,26 +88,40 @@ form.onsubmit = async e => {
     data: dataInput.value,
     hora: horaInput.value,
     servico: $("servico").value,
-    preco: servicos[$("servico").value]
+    preco: servicos[$("servico").value],
+    criadoEm: new Date()
   };
 
   await db.collection("agendamentos").add(ag);
+
+  window.open(
+    `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+`📌 NOVO AGENDAMENTO
+👤 ${ag.nome}
+📅 ${ag.data}
+⏰ ${ag.hora}
+✂️ ${ag.servico}
+💰 R$ ${ag.preco}`
+    )}`
+  );
 
   alert("Agendamento confirmado!");
   form.reset();
   horariosDiv.innerHTML = "";
   precoInput.value = "";
-};
+});
 
-/* ADMIN */
+/* ================= ADMIN ================= */
+
 const btnAdmin = $("btnAdmin");
 const areaAdmin = $("areaAdmin");
 const btnSair = $("btnSairAdmin");
 const listaAg = $("listaAgendamentos");
 const listaHist = $("listaHistorico");
+const btnRel = $("btnRelatorioDiario");
 
 let taps = 0;
-$("h1").onclick = () => {
+document.querySelector("h1").onclick = () => {
   taps++;
   if (taps === 5) {
     btnAdmin.style.display = "block";
@@ -132,32 +146,68 @@ async function carregarAdmin() {
   listaHist.innerHTML = "";
 
   const agora = new Date();
-  const snap = await db.collection("agendamentos").get();
 
-  snap.forEach(doc => {
+  const snapshot = await db.collection("agendamentos").get();
+
+  if (snapshot.empty) {
+    listaAg.innerHTML = "<li>Nenhum agendamento</li>";
+    return;
+  }
+
+  snapshot.forEach(doc => {
     const a = doc.data();
-    const [y,m,d] = a.data.split("-").map(Number);
-    const [h,mi] = a.hora.split(":").map(Number);
-    const dataHora = new Date(y, m-1, d, h, mi);
+
+    const [ano, mes, dia] = a.data.split("-").map(Number);
+    const [h, m] = a.hora.split(":").map(Number);
+    const dataHora = new Date(ano, mes - 1, dia, h, m);
 
     const li = document.createElement("li");
-    li.innerHTML = `📅 ${a.data} ⏰ ${a.hora}<br>👤 ${a.nome}<br>✂️ ${a.servico} — R$ ${a.preco}`;
+    li.innerHTML = `
+📅 ${a.data} ⏰ ${a.hora}<br>
+👤 ${a.nome}<br>
+✂️ ${a.servico} — R$ ${a.preco}
+`;
 
     if (dataHora >= agora) {
       const btn = document.createElement("button");
       btn.textContent = "❌ Remover";
       btn.onclick = async () => {
-        if (confirm("Remover agendamento?")) {
-          await db.collection("agendamentos").doc(doc.id).delete();
-          carregarAdmin();
-        }
+        if (!confirm("Remover agendamento?")) return;
+        await db.collection("agendamentos").doc(doc.id).delete();
+        carregarAdmin();
       };
       li.appendChild(btn);
       listaAg.appendChild(li);
     } else {
+      li.style.opacity = "0.6";
       listaHist.appendChild(li);
     }
   });
 }
+
+/* ================= RELATÓRIO ================= */
+
+btnRel.onclick = async () => {
+  const hoje = new Date().toISOString().split("T")[0];
+
+  const snap = await db.collection("agendamentos")
+    .where("data", "==", hoje)
+    .get();
+
+  if (snap.empty) return alert("Nenhum atendimento hoje");
+
+  let total = 0;
+  let texto = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
+
+  snap.forEach(d => {
+    const a = d.data();
+    texto += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+    total += Number(a.preco);
+  });
+
+  texto += `\n💰 Total: R$ ${total}`;
+
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`);
+};
 
 });
