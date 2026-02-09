@@ -163,41 +163,41 @@ btnRel.onclick=async()=>{
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
 };
 // ===== BOTÃO INSTALAR APLICATIVO (PWA) =====
-let deferredPrompt;
+let deferredPrompt = null;
 const btnInstalar = document.getElementById("btnInstalar");
 
-// se o app JÁ estiver instalado, nunca mostrar o botão
-if (window.matchMedia('(display-mode: standalone)').matches) {
-  btnInstalar.style.display = "none";
-}
+btnInstalar.style.display = "none";
 
-// escuta quando o navegador permite instalar
+// escuta o evento correto
 window.addEventListener("beforeinstallprompt", (e) => {
+  console.log("beforeinstallprompt disparou");
   e.preventDefault();
   deferredPrompt = e;
-
-  // só mostra se NÃO estiver instalado
-  if (!window.matchMedia('(display-mode: standalone)').matches) {
-    btnInstalar.style.display = "block";
-  }
+  btnInstalar.style.display = "block";
 });
 
-// clique no botão instalar
+// clique
 btnInstalar.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
+  if (!deferredPrompt) {
+    alert("Instalação não disponível agora. Abra no Chrome.");
+    return;
+  }
 
   deferredPrompt.prompt();
-  const choice = await deferredPrompt.userChoice;
+  const result = await deferredPrompt.userChoice;
 
-  if (choice.outcome === "accepted") {
+  console.log("Escolha:", result.outcome);
+
+  if (result.outcome === "accepted") {
     btnInstalar.style.display = "none";
   }
 
   deferredPrompt = null;
 });
 
-// quando o app for instalado, esconder o botão
+// depois de instalado
 window.addEventListener("appinstalled", () => {
+  console.log("App instalado");
   btnInstalar.style.display = "none";
 });
 });
