@@ -1,18 +1,18 @@
 // Firebase config
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJETO",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "SUA_API_KEY_REAL",
+  authDomain: "barbearia-madruga-oficial.firebaseapp.com",
+  projectId: "barbearia-madruga-oficial",
+  storageBucket: "barbearia-madruga-oficial.appspot.com",
+  messagingSenderId: "364300779378",
+  appId: "1:364300779378:web:84d38ff82ca410cbfee7eb"
 };
 
 // Inicializa Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Inicializa Firestore
+// Firestore
 const db = firebase.firestore();
 
-// deixa disponível pro script.js
+// Disponível globalmente
 window.db = db;
