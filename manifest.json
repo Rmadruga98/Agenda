@@ -1,25 +1,15 @@
 {
   "name": "Barbearia Madruga",
   "short_name": "Madruga",
-  "description": "Agendamento online da Barbearia Madruga",
-  "start_url": "/Agenda/index.html",
-  "scope": "/Agenda/",
+  "start_url": ".",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0f0f0f",
   "theme_color": "#1c1c1c",
   "icons": [
     {
-      "src": "/Agenda/logo-192.png",
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png"
-    },
-    {
-      "src": "/Agenda/logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
     }
-  ],
-  "dir": "ltr",
-  "lang": "pt"
+  ]
 }

@@ -1,21 +1,19 @@
-const CACHE_NAME = "madruga-agenda-v5";
-const REPO = "/Agenda";
+const CACHE_NAME = "madruga-v1";
 
 const FILES_TO_CACHE = [
-  `${REPO}/`,
-  `${REPO}/index.html`,
-  `${REPO}/style.css`,
-  `${REPO}/script.js`,
-  `${REPO}/manifest.json`,
-  `${REPO}/logo-192.png`,
-  `${REPO}/logo-512.png`
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./manifest.json",
+  "./logo.png"
 ];
 
 self.addEventListener("install", event => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
   );
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
