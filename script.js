@@ -160,7 +160,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const btn = document.createElement("button");
         btn.textContent = "❌ Remover";
         btn.onclick = async () => {
-          await db.collection("agendamentos").doc(doc.id).delete();
+         await db
+  .collection("agendamentos")
+  .doc(doc.id)
+  .delete({
+    admin: "madruga123"
+  });
           carregarAdmin();
         };
         li.appendChild(btn);
