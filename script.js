@@ -193,6 +193,65 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+}function carregarAdmin() {
+  const listaAg = document.getElementById("listaAgendamentos");
+  const listaHist = document.getElementById("listaHistorico");
+
+  listaAg.innerHTML = "";
+  listaHist.innerHTML = "";
+
+  const agora = new Date();
+  agora.setSeconds(0, 0);
+
+  db.collection("agendamentos")
+    .orderBy("data")
+    .orderBy("hora")
+    .onSnapshot(snapshot => {
+
+      listaAg.innerHTML = "";
+      listaHist.innerHTML = "";
+
+      if (snapshot.empty) {
+        listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const a = doc.data();
+
+        // 🔥 Conversão 100% segura (sem bug de fuso)
+        const [ano, mes, dia] = a.data.split("-").map(Number);
+        const [h, m] = a.hora.split(":").map(Number);
+        const dataHora = new Date(ano, mes - 1, dia, h, m, 0, 0);
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          📅 ${a.data} ⏰ ${a.hora}<br>
+          👤 ${a.nome}<br>
+          ✂️ ${a.servico} — R$ ${a.preco}
+        `;
+
+        if (dataHora >= agora) {
+          // 🟢 AGENDA ATIVA
+          const btn = document.createElement("button");
+          btn.textContent = "❌ Remover";
+          btn.style.marginTop = "6px";
+
+          btn.onclick = async () => {
+            if (!confirm("Remover este agendamento?")) return;
+            await db.collection("agendamentos").doc(doc.id).delete();
+          };
+
+          li.appendChild(btn);
+          listaAg.appendChild(li);
+
+        } else {
+          // 🔵 HISTÓRICO
+          li.style.opacity = "0.6";
+          listaHist.appendChild(li);
+        }
+      });
+    });
 }
 
   if (btnRel) {
