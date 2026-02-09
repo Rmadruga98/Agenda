@@ -162,5 +162,42 @@ btnRel.onclick=async()=>{
   txt+=`\n💰 Total: R$ ${total}`;
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
 };
+// ===== BOTÃO INSTALAR APLICATIVO (PWA) =====
+let deferredPrompt;
+const btnInstalar = document.getElementById("btnInstalar");
 
+// se o app JÁ estiver instalado, nunca mostrar o botão
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  btnInstalar.style.display = "none";
+}
+
+// escuta quando o navegador permite instalar
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // só mostra se NÃO estiver instalado
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    btnInstalar.style.display = "block";
+  }
+});
+
+// clique no botão instalar
+btnInstalar.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+
+  if (choice.outcome === "accepted") {
+    btnInstalar.style.display = "none";
+  }
+
+  deferredPrompt = null;
+});
+
+// quando o app for instalado, esconder o botão
+window.addEventListener("appinstalled", () => {
+  btnInstalar.style.display = "none";
+});
 });
