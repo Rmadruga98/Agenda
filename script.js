@@ -239,4 +239,29 @@ function mostrarConfirmacao() {
     overlay.remove();
   }, 1800);
 }
+// ===== BOTÃO INSTALAR PWA =====
+let deferredPrompt;
+const btnInstalar = document.getElementById("btnInstalar");
+
+if (btnInstalar) {
+  btnInstalar.style.display = "none";
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstalar.style.display = "block";
+  });
+
+  btnInstalar.addEventListener("click", async () => {
+    if (!deferredPrompt) {
+      alert("Instalação disponível apenas após publicar o site.");
+      return;
+    }
+
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btnInstalar.style.display = "none";
+  });
+}
 });
