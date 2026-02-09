@@ -2,18 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Agendamento - Barbearia Madruga</title>
+  <title>Agendamento • Barbearia Madruga</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1c1c">
   <link rel="icon" href="logo.png">
 
+  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
 <div class="container">
 
   <div class="logo-wrapper">
@@ -28,20 +33,21 @@
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
   <form id="formAgendamento">
-    <label>Nome:</label>
+
+    <label>Nome</label>
     <input id="nome" required>
 
-    <label>WhatsApp:</label>
+    <label>WhatsApp</label>
     <input id="telefone" required placeholder="11999999999">
 
-    <label>Data:</label>
+    <label>Data</label>
     <input type="date" id="data" required>
 
-    <label>Horário:</label>
+    <label>Horário</label>
     <div id="horarios" class="horarios"></div>
     <input type="hidden" id="hora">
 
-    <label>Serviço:</label>
+    <label>Serviço</label>
     <select id="servico" required>
       <option disabled selected>Selecione</option>
       <option>Corte Simples</option>
@@ -57,14 +63,16 @@
       <option>Platinado + Corte</option>
     </select>
 
-    <label>Preço:</label>
+    <label>Preço</label>
     <input id="preco" readonly>
 
-    <button>Agendar</button>
+    <button type="submit">Agendar</button>
   </form>
 
   <!-- ADMIN -->
-  <button id="btnAdmin" style="display:none;">🔒 Área do Administrador</button>
+  <button id="btnAdmin" class="btn-admin" style="display:none;">
+    🔒 Área do Administrador
+  </button>
 
   <div id="areaAdmin" style="display:none;">
     <h2>📋 Agenda Ativa</h2>
@@ -90,11 +98,14 @@
 
 <script src="firebase.js"></script>
 <script src="script.js"></script>
+
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
-
+<audio id="somConfirmacao" preload="auto">
+  <source src="confirmacao.mp3" type="audio/mpeg">
+</audio>
 </body>
 </html>

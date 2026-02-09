@@ -105,7 +105,7 @@ form.addEventListener("submit", async e => {
     )}`
   );
 
-  alert("Agendamento confirmado!");
+  mostrarConfirmacao();
   form.reset();
   horariosDiv.innerHTML = "";
   precoInput.value = "";
@@ -210,4 +210,33 @@ btnRel.onclick = async () => {
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`);
 };
 
+function mostrarConfirmacao() {
+  const overlay = document.createElement("div");
+  overlay.className = "confirmacao";
+
+  overlay.innerHTML = `
+    <div class="confirmacao-box">
+      <div class="check">✔️</div>
+      <p>Agendamento confirmado!</p>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // 🔊 TOCAR SOM
+  const som = document.getElementById("somConfirmacao");
+  if (som) {
+    som.currentTime = 0;
+    som.play().catch(() => {});
+  }
+
+  // 📳 Vibração (se suportado)
+  if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]);
+  }
+
+  setTimeout(() => {
+    overlay.remove();
+  }, 1800);
+}
 });

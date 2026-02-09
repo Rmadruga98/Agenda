@@ -1,101 +1,218 @@
 body {
   font-family: Arial, sans-serif;
-  background: #0f0f0f;
+  background: radial-gradient(circle at top, #1a1a1a, #000);
   margin: 0;
   padding: 20px;
 }
 
+/* Container */
 .container {
   max-width: 500px;
   margin: auto;
-  background: #1c1c1c;
+  background: linear-gradient(180deg, #1c1c1c, #141414);
   padding: 25px;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0,0,0,.6);
   text-align: center;
 }
 
+/* Logo */
 .logo-wrapper {
   width: 200px;
   height: 200px;
   margin: auto;
+  border-radius: 50%;
+  background: #111;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logo {
-  max-width: 100%;
+  max-width: 85%;
 }
 
-h1, h2 {
+/* Títulos */
+h1 {
   color: #fff;
+  margin: 15px 0;
 }
 
+.barber-nome {
+  font-family: 'Anton', sans-serif;
+  color: #f5b400;
+  letter-spacing: 2px;
+}
+
+.barbeiro-nome {
+  color: #aaa;
+  font-size: 13px;
+}
+
+/* Inputs */
 label {
   color: #fff;
   display: block;
-  margin-top: 10px;
   text-align: left;
+  margin-top: 10px;
 }
 
 input, select {
   width: 100%;
   padding: 12px;
+  margin-top: 6px;
   border-radius: 10px;
   border: 1px solid #333;
-  background: #2a2a2a;
+  background: #222;
   color: #fff;
 }
 
+input:focus, select:focus {
+  outline: none;
+  border-color: #1e90ff;
+}
+
+/* Botões */
 button {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
+  padding: 14px;
+  margin-top: 15px;
+  border-radius: 12px;
   border: none;
-  background: #1e90ff;
+  background: linear-gradient(135deg, #1e90ff, #0066ff);
   color: #fff;
-  cursor: pointer;
+  font-size: 16px;
 }
 
-/* HORÁRIOS */
+button:active {
+  transform: scale(.97);
+}
+
+/* Horários */
 .horarios {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin: 15px 0;
+  margin-top: 10px;
 }
 
 .hora-btn {
+  background: #1a1a1a;
+  border: 1px solid #333;
   padding: 14px;
-  border-radius: 10px;
-  border: 2px solid #333;
-  background: #1c1c1c;
-  color: #fff;
-  cursor: pointer;
+  border-radius: 12px;
+  font-weight: bold;
 }
 
 .hora-btn.ativa {
-  background: #1e90ff;
-  border-color: #1e90ff;
+  background: linear-gradient(135deg, #1e90ff, #0066ff);
 }
 
-/* ADMIN */
-#areaAdmin {
-  display: none;
+/* Admin */
+.btn-admin {
+  background: linear-gradient(135deg, #f5b400, #c99700);
+  color: #000;
+  font-weight: bold;
 }
 
 #listaAgendamentos li,
 #listaHistorico li {
-  background: #111;
+  background: #1a1a1a;
+  margin-top: 10px;
   padding: 12px;
-  margin: 10px 0;
   border-radius: 8px;
-  color: #fff;
 }
 
 #listaAgendamentos button {
   background: #d9534f;
-  margin-top: 8px;
+}
+
+/* Rodapé */
+.rodape {
+  margin-top: 30px;
+  color: #777;
+  font-size: 13px;
+}
+/* ===== CORREÇÃO TEXTO AGENDAMENTOS ===== */
+
+#listaAgendamentos li,
+#listaHistorico li {
+  color: #ffffff !important;
+}
+
+#listaAgendamentos li span,
+#listaHistorico li span,
+#listaAgendamentos li strong,
+#listaHistorico li strong {
+  color: #ffffff !important;
+}
+
+/* Nome do cliente */
+#listaAgendamentos li .nome,
+#listaHistorico li .nome {
+  color: #4fc3f7;
+  font-weight: bold;
+}
+
+/* Serviço */
+#listaAgendamentos li .servico,
+#listaHistorico li .servico {
+  color: #f5b400;
+}
+
+/* Preço */
+#listaAgendamentos li .preco,
+#listaHistorico li .preco {
+  color: #4caf50;
+  font-weight: bold;
+}
+#areaAdmin h2:nth-of-type(1) {
+  color: #f5b400; /* Agenda Ativa */
+}
+
+#areaAdmin h2:nth-of-type(2) {
+  color: #ff6b6b; /* Histórico */
+}
+/* ===== CONFIRMAÇÃO DE AGENDAMENTO ===== */
+.confirmacao {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.confirmacao-box {
+  background: #1e1e1e;
+  border-radius: 20px;
+  padding: 30px 25px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0,255,120,0.4);
+}
+
+.confirmacao-box .check {
+  font-size: 70px;
+  color: #2ecc71;
+  animation: pop 0.4s ease;
+}
+
+.confirmacao-box p {
+  margin-top: 12px;
+  font-size: 18px;
+  color: #fff;
+  font-weight: bold;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.4); }
+  80% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
