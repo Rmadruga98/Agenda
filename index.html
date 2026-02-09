@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Agendamento - Barbearia Madruga</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1c1c1c">
-  <link rel="icon" href="logo.png">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1c1c1c" />
+  <link rel="icon" href="logo.png" />
 
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 <div class="container">
 
   <div class="logo-wrapper">
-    <img src="logo.png" class="logo">
+    <img src="logo.png" class="logo" />
   </div>
 
   <h1>Agendamento Online 💈</h1>
+  <h3 class="barber-nome">Barber Madruga</h3>
+  <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
   <form id="formAgendamento">
-    <label>Nome:</label>
-    <input id="nome" required>
+    <label>Nome</label>
+    <input id="nome" required />
 
-    <label>WhatsApp:</label>
-    <input id="telefone" required placeholder="11999999999">
+    <label>WhatsApp</label>
+    <input id="telefone" required placeholder="11999999999" />
 
-    <label>Data:</label>
-    <input type="date" id="data" required>
+    <label>Data</label>
+    <input type="date" id="data" required />
 
-    <label>Horário:</label>
+    <label>Horário</label>
     <div id="horarios" class="horarios"></div>
-    <input type="hidden" id="hora">
+    <input type="hidden" id="hora" />
 
-    <label>Serviço:</label>
+    <label>Serviço</label>
     <select id="servico" required>
       <option disabled selected>Selecione</option>
       <option>Corte Simples</option>
@@ -52,8 +54,8 @@
       <option>Platinado + Corte</option>
     </select>
 
-    <label>Preço:</label>
-    <input id="preco" readonly>
+    <label>Preço</label>
+    <input id="preco" readonly />
 
     <button>Agendar</button>
   </form>
@@ -65,18 +67,16 @@
     <h2>📋 Agenda Ativa</h2>
     <ul id="listaAgendamentos"></ul>
 
-    <button id="btnRelatorioDiario">📊 Enviar relatório</button>
+    <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
     <button id="btnSairAdmin">❌ Sair</button>
   </div>
 
-  <footer class="rodape">© 2026 • Barber Madruga 
-  criado por Ricardo</footer>
+  <footer class="rodape">© 2026 • Barber Madruga</footer>
 </div>
 
-<!-- 🔥 FIREBASE (ORDEM CORRETA) -->
+<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <script src="firebase.js"></script>
 <script src="script.js"></script>
