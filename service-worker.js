@@ -1,4 +1,5 @@
-const CACHE_NAME = "agenda-madruga-v12";
+const CACHE_NAME = "agenda-madruga-v10";
+
 const FILES_TO_CACHE = [
   "/Agenda/",
   "/Agenda/index.html",
@@ -18,7 +19,11 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      )
     )
   );
   self.clients.claim();
