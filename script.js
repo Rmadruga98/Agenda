@@ -141,48 +141,64 @@ form.addEventListener("submit", async e => {
   precoInput.value = "";
 });
 
-/* ===== ÁREA ADMIN ===== */
-const btnAdmin = $("btnAdmin");
-const areaAdmin = $("areaAdmin");
-const btnSair = $("btnSairAdmin");
-const listaAg = $("listaAgendamentos");
-const listaHist = $("listaHistorico");
-const btnRel = $("btnRelatorioDiario");
+// ===== ADMIN (VERSÃO ESTÁVEL PARA CELULAR/PWA) =====
+const btnAdmin = document.getElementById("btnAdmin");
+const areaAdmin = document.getElementById("areaAdmin");
+const btnSairAdmin = document.getElementById("btnSairAdmin");
+const listaAg = document.getElementById("listaAgendamentos");
+const listaHist = document.getElementById("listaHistorico");
+const btnRel = document.getElementById("btnRelatorioDiario");
 
+// 🔒 gesto secreto (5 toques no título)
 let taps = 0;
-$("h1").onclick = () => {
-  if (++taps === 5) {
+document.querySelector("h1").addEventListener("click", () => {
+  taps++;
+  if (taps === 5) {
     btnAdmin.style.display = "block";
-    alert("Modo administrador liberado");
+    alert("🔓 Modo administrador liberado");
   }
-};
+});
 
-btnAdmin.onclick = () => {
-  if (prompt("Senha admin:") !== SENHA_ADMIN) return alert("Senha incorreta");
+// login admin
+btnAdmin.addEventListener("click", async () => {
+  const senha = prompt("Digite a senha do administrador:");
+  if (senha !== SENHA_ADMIN) {
+    alert("Senha incorreta");
+    return;
+  }
+
   areaAdmin.style.display = "block";
   btnAdmin.style.display = "none";
   carregarAdmin();
-};
+});
 
-btnSair.onclick = () => {
+// sair admin
+btnSairAdmin.addEventListener("click", () => {
   areaAdmin.style.display = "none";
   btnAdmin.style.display = "block";
-};
+});
 
+// carregar agenda + histórico
 async function carregarAdmin() {
   listaAg.innerHTML = "";
   listaHist.innerHTML = "";
 
   const agora = new Date();
-  agora.setSeconds(0,0);
+  agora.setSeconds(0, 0);
 
-  const snap = await db.collection("agendamentos").get();
+  const snapshot = await db.collection("agendamentos").get();
 
-  snap.forEach(doc => {
+  if (snapshot.empty) {
+    listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
+    return;
+  }
+
+  snapshot.forEach(doc => {
     const a = doc.data();
-    const [A,M,D] = a.data.split("-").map(Number);
-    const [H,Mi] = a.hora.split(":").map(Number);
-    const dataHora = new Date(A, M-1, D, H, Mi);
+
+    const [A, M, D] = a.data.split("-").map(Number);
+    const [H, Mi] = a.hora.split(":").map(Number);
+    const dataHora = new Date(A, M - 1, D, H, Mi);
 
     const li = document.createElement("li");
     li.innerHTML = `
@@ -194,39 +210,46 @@ async function carregarAdmin() {
     if (dataHora >= agora) {
       const btn = document.createElement("button");
       btn.textContent = "❌ Remover";
-      btn.onclick = async () => {
+
+      btn.addEventListener("click", async () => {
+        if (!confirm("Remover este agendamento?")) return;
         await db.collection("agendamentos").doc(doc.id).delete();
         carregarAdmin();
-      };
+      });
+
       li.appendChild(btn);
       listaAg.appendChild(li);
     } else {
+      li.style.opacity = "0.6";
       listaHist.appendChild(li);
     }
   });
 }
 
-/* ===== RELATÓRIO ===== */
-btnRel.onclick = async () => {
+// relatório do dia
+btnRel.addEventListener("click", async () => {
   const hoje = new Date().toISOString().split("T")[0];
-  const snap = await db.collection("agendamentos")
-    .where("data", "==", hoje)
-    .get();
+  const snap = await db.collection("agendamentos").where("data", "==", hoje).get();
 
-  if (snap.empty) return alert("Nenhum atendimento hoje");
+  if (snap.empty) {
+    alert("Nenhum atendimento hoje");
+    return;
+  }
 
   let total = 0;
-  let txt = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
+  let texto = `📊 RELATÓRIO DO DIA\n📅 ${hoje}\n\n`;
 
   snap.forEach(d => {
     const a = d.data();
-    txt += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
+    texto += `⏰ ${a.hora} | ${a.nome} | ${a.servico} | R$ ${a.preco}\n`;
     total += Number(a.preco);
   });
 
-  txt += `\n💰 Total: R$ ${total}`;
-  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`);
-};
+  texto += `\n💰 Total do dia: R$ ${total}`;
+
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`);
+});
+
 
 /* ===== BOTÃO INSTALAR APP (PWA) ===== */
 let deferredPrompt = null;
