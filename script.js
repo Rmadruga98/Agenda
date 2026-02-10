@@ -56,6 +56,13 @@ const dataInput = $("data");
 const precoInput = $("preco");
 const form = $("formAgendamento");
 
+// 🔒 BLOQUEAR DATAS PASSADAS
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0);
+
+// define o mínimo como hoje
+dataInput.min = hoje.toISOString().split("T")[0];
+
 /* ===== PREÇO ===== */
 $("servico").addEventListener("change", e => {
   precoInput.value = servicos[e.target.value]
