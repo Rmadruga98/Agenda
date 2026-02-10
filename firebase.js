@@ -9,6 +9,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-firebase.auth().signInAnonymously();
+firebase.auth().signInAnonymously()
+  .catch(error => {
+    console.error("Erro login anônimo:", error);
+  });
 
 window.db = firebase.firestore();

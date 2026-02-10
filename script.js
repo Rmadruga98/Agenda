@@ -274,5 +274,41 @@ btnInstalar.onclick = async () => {
 window.addEventListener("appinstalled", () => {
   btnInstalar.style.display = "none";
 });
+const btnLimparHistorico = document.getElementById("btnLimparHistorico");
 
+btnLimparHistorico.addEventListener("click", async () => {
+  if (!confirm("Apagar TODO o histórico? Essa ação não pode ser desfeita.")) {
+    return;
+  }
+
+  const agora = new Date();
+  agora.setSeconds(0, 0);
+
+  const snapshot = await db.collection("agendamentos").get();
+
+  const batch = db.batch();
+  let apagou = false;
+
+  snapshot.forEach(doc => {
+    const a = doc.data();
+    const [A, M, D] = a.data.split("-").map(Number);
+    const [H, Mi] = a.hora.split(":").map(Number);
+    const dataHora = new Date(A, M - 1, D, H, Mi);
+
+    // só apaga históricos (passados)
+    if (dataHora < agora) {
+      batch.delete(doc.ref);
+      apagou = true;
+    }
+  });
+
+  if (!apagou) {
+    alert("Nenhum histórico para apagar.");
+    return;
+  }
+
+  await batch.commit();
+  alert("Histórico apagado com sucesso!");
+  carregarAdmin();
+});
 });
