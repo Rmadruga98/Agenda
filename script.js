@@ -60,6 +60,11 @@ const form = $("formAgendamento");
 const hoje = new Date();
 hoje.setHours(0, 0, 0, 0);
 
+// ✅ DATAS LIBERADAS MANUALMENTE (EXCEÇÕES)
+const datasLiberadas = [
+"2026-02-16"
+];
+
 // define o mínimo como hoje
 dataInput.min = hoje.toISOString().split("T")[0];
 
@@ -75,12 +80,6 @@ async function carregarHorarios(data) {
   horariosDiv.innerHTML = "";
   horaInput.value = "";
 
-  const dia = new Date(data + "T00:00").getDay();
-  if (dia === 0 || dia === 1) {
-    alert("Não atendemos domingo e segunda");
-    dataInput.value = "";
-    return;
-  }
 
   const snap = await db.collection("agendamentos")
     .where("data", "==", data)
@@ -111,7 +110,23 @@ async function carregarHorarios(data) {
 }
 
 dataInput.addEventListener("change", () => {
-  if (dataInput.value) carregarHorarios(dataInput.value);
+  const dataSelecionada = dataInput.value;
+
+  // se for exceção, libera direto
+  if (datasLiberadas.includes(dataSelecionada)) {
+    carregarHorarios(dataSelecionada);
+    return;
+  }
+
+  // valida dia da semana
+  const dia = new Date(dataSelecionada + "T00:00").getDay();
+  if (dia === 0 || dia === 1) {
+    alert("Não atendemos domingo e segunda");
+    dataInput.value = "";
+    return;
+  }
+
+  carregarHorarios(dataSelecionada);
 });
 
 /* ===== AGENDAR ===== */
@@ -283,39 +298,43 @@ window.addEventListener("appinstalled", () => {
 });
 const btnLimparHistorico = document.getElementById("btnLimparHistorico");
 
-btnLimparHistorico.addEventListener("click", async () => {
-  if (!confirm("Apagar TODO o histórico? Essa ação não pode ser desfeita.")) {
-    return;
-  }
+if (btnLimparHistorico) {
+  btnLimparHistorico.addEventListener("click", async () => {
 
-  const agora = new Date();
-  agora.setSeconds(0, 0);
-
-  const snapshot = await db.collection("agendamentos").get();
-
-  const batch = db.batch();
-  let apagou = false;
-
-  snapshot.forEach(doc => {
-    const a = doc.data();
-    const [A, M, D] = a.data.split("-").map(Number);
-    const [H, Mi] = a.hora.split(":").map(Number);
-    const dataHora = new Date(A, M - 1, D, H, Mi);
-
-    // só apaga históricos (passados)
-    if (dataHora < agora) {
-      batch.delete(doc.ref);
-      apagou = true;
+    if (!confirm("Apagar TODO o histórico? Essa ação não pode ser desfeita.")) {
+      return;
     }
+
+    const agora = new Date();
+    agora.setSeconds(0, 0);
+
+    const snapshot = await db.collection("agendamentos").get();
+
+    const batch = db.batch();
+    let apagou = false;
+
+    snapshot.forEach(doc => {
+      const a = doc.data();
+      const [A, M, D] = a.data.split("-").map(Number);
+      const [H, Mi] = a.hora.split(":").map(Number);
+      const dataHora = new Date(A, M - 1, D, H, Mi);
+
+      // só apaga históricos (passados)
+      if (dataHora < agora) {
+        batch.delete(doc.ref);
+        apagou = true;
+      }
+    });
+
+    if (!apagou) {
+      alert("Nenhum histórico para apagar.");
+      return;
+    }
+
+    await batch.commit();
+    alert("Histórico apagado com sucesso!");
+    carregarAdmin();
+
   });
-
-  if (!apagou) {
-    alert("Nenhum histórico para apagar.");
-    return;
-  }
-
-  await batch.commit();
-  alert("Histórico apagado com sucesso!");
-  carregarAdmin();
-});
+}
 });
