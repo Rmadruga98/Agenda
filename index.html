@@ -27,7 +27,16 @@
   <h3 class="barber-nome">Barber Madruga</h3>
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
-  <form id="formAgendamento">
+  <!-- 🔐 VERIFICAÇÃO DE TELEFONE -->
+  <div id="verificacaoTelefone">
+    <label>Digite seu WhatsApp para continuar:</label>
+    <input id="telefoneVerificacao" placeholder="11999999999">
+    <button id="btnConfirmarTelefone">Confirmar número</button>
+  </div>
+
+  <!-- 📅 FORMULÁRIO (COMEÇA ESCONDIDO) -->
+  <form id="formAgendamento" style="display:none;">
+
     <label>Nome:</label>
     <input id="nome" required>
 
@@ -63,7 +72,7 @@
     <button>Agendar</button>
   </form>
 
-  <!-- ADMIN -->
+  <!-- 🔒 ADMIN -->
   <button id="btnAdmin" style="display:none;">🔒 Área do Administrador</button>
 
   <div id="areaAdmin" style="display:none;">
@@ -72,9 +81,8 @@
 
     <h2>📚 Histórico</h2>
     <ul id="listaHistorico"></ul>
-    
-    <button id="btnLimparHistorico">🧹 Apagar histórico</button>
 
+    <button id="btnLimparHistorico">🧹 Apagar histórico</button>
     <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
     <button id="btnSairAdmin">❌ Sair</button>
   </div>
@@ -82,6 +90,7 @@
   <footer class="rodape">
     © 2026 • Barber Madruga
   </footer>
+
 </div>
 
 <!-- Firebase -->
