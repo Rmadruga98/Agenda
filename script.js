@@ -1,11 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-/* ===== CONFIG ===== */
+/* ================= CONFIG ================= */
 const WHATSAPP = "5535998066403";
+const SENHA_ADMIN = "madruga123";
 const HORA_ABERTURA = 8;
 const HORA_FECHAMENTO = 19;
 
-/* ===== SERVIÇOS ===== */
+/* ================= SERVIÇOS ================= */
 const servicos = {
   "Corte Simples": 30,
   "Corte Degradê": 35,
@@ -23,15 +24,13 @@ const servicos = {
 const $ = id => document.getElementById(id);
 const db = window.db;
 
-/* ===============================
-   🔐 VERIFICAÇÃO DE WHATSAPP (30 DIAS)
-================================== */
+/* ================= VERIFICAÇÃO WHATS (30 DIAS) ================= */
 const divVerificacao = $("verificacaoTelefone");
 const btnConfirmarTelefone = $("btnConfirmarTelefone");
 const inputTelefoneVerificacao = $("telefoneVerificacao");
 const formAgendamento = $("formAgendamento");
 
-const LIMITE = 1000 * 60 * 60 * 24 * 30; // 30 dias
+const LIMITE = 1000 * 60 * 60 * 24 * 30;
 const dadosSalvos = localStorage.getItem("verificacaoWhats");
 
 if (dadosSalvos) {
@@ -49,11 +48,11 @@ if (dadosSalvos) {
   formAgendamento.style.display = "none";
 }
 
-btnConfirmarTelefone.addEventListener("click", () => {
+btnConfirmarTelefone.onclick = e => {
+  e.preventDefault();
   const telefone = inputTelefoneVerificacao.value.replace(/\D/g, "");
-
   if (telefone.length < 10 || telefone.length > 11) {
-    alert("Digite um WhatsApp válido com DDD");
+    alert("Digite um WhatsApp válido");
     return;
   }
 
@@ -62,20 +61,13 @@ btnConfirmarTelefone.addEventListener("click", () => {
     data: Date.now()
   }));
 
-  window.open(
-    `https://wa.me/55${telefone}?text=${encodeURIComponent(
-      "✅ Número confirmado para agendamento na Barbearia Madruga"
-    )}`,
-    "_blank"
-  );
+  window.open(`https://wa.me/55${telefone}`, "_blank");
 
   divVerificacao.style.display = "none";
   formAgendamento.style.display = "block";
-});
+};
 
-/* ===============================
-   📅 AGENDAMENTO
-================================== */
+/* ================= AGENDAMENTO ================= */
 const horariosDiv = $("horarios");
 const horaInput = $("hora");
 const dataInput = $("data");
@@ -85,11 +77,11 @@ const hoje = new Date();
 hoje.setHours(0,0,0,0);
 dataInput.min = hoje.toISOString().split("T")[0];
 
-$("servico").addEventListener("change", e => {
+$("servico").onchange = e => {
   precoInput.value = servicos[e.target.value]
     ? `R$ ${servicos[e.target.value]}`
     : "";
-});
+};
 
 async function carregarHorarios(data) {
   horariosDiv.innerHTML = "";
@@ -102,15 +94,11 @@ async function carregarHorarios(data) {
     return;
   }
 
-  const snap = await db.collection("agendamentos")
-    .where("data", "==", data)
-    .get();
-
+  const snap = await db.collection("agendamentos").where("data","==",data).get();
   const ocupados = snap.docs.map(d => d.data().hora);
 
   for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
     if (h === 12) continue;
-
     const hora = String(h).padStart(2,"0") + ":00";
     if (ocupados.includes(hora)) continue;
 
@@ -127,26 +115,15 @@ async function carregarHorarios(data) {
   }
 }
 
-dataInput.addEventListener("change", () => {
+dataInput.onchange = () => {
   if (dataInput.value) carregarHorarios(dataInput.value);
-});
+};
 
-formAgendamento.addEventListener("submit", async e => {
+formAgendamento.onsubmit = async e => {
   e.preventDefault();
+  if (!horaInput.value) return alert("Selecione um horário");
 
-  if (!horaInput.value) {
-    alert("Selecione um horário");
-    return;
-  }
-
-  const dados = localStorage.getItem("verificacaoWhats");
-  if (!dados) {
-    alert("Confirme seu WhatsApp para continuar");
-    location.reload();
-    return;
-  }
-
-  const { telefone } = JSON.parse(dados);
+  const { telefone } = JSON.parse(localStorage.getItem("verificacaoWhats"));
 
   await db.collection("agendamentos").add({
     nome: $("nome").value,
@@ -158,20 +135,91 @@ formAgendamento.addEventListener("submit", async e => {
     criadoEm: new Date()
   });
 
-  window.open(
-    `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-`📌 NOVO AGENDAMENTO
-👤 ${$("nome").value}
-📅 ${dataInput.value}
-⏰ ${horaInput.value}
-✂️ ${$("servico").value}`
-    )}`
-  );
-
   alert("Agendamento confirmado!");
   formAgendamento.reset();
   horariosDiv.innerHTML = "";
   precoInput.value = "";
+};
+
+/* ================= ADMIN ================= */
+const btnAdmin = $("btnAdmin");
+const areaAdmin = $("areaAdmin");
+const btnSairAdmin = $("btnSairAdmin");
+const listaAg = $("listaAgendamentos");
+const listaHist = $("listaHistorico");
+
+let taps = 0;
+document.querySelector("h1").onclick = () => {
+  if (++taps === 5) {
+    btnAdmin.style.display = "block";
+    alert("Modo administrador liberado");
+  }
+};
+
+btnAdmin.onclick = () => {
+  if (prompt("Senha admin:") !== SENHA_ADMIN) return;
+  areaAdmin.style.display = "block";
+  btnAdmin.style.display = "none";
+  carregarAdmin();
+};
+
+btnSairAdmin.onclick = () => {
+  areaAdmin.style.display = "none";
+  btnAdmin.style.display = "block";
+};
+
+async function carregarAdmin() {
+  listaAg.innerHTML = "";
+  listaHist.innerHTML = "";
+
+  const agora = new Date();
+  const snap = await db.collection("agendamentos").get();
+
+  snap.forEach(doc => {
+    const a = doc.data();
+    const [A,M,D] = a.data.split("-").map(Number);
+    const [H,Mi] = a.hora.split(":").map(Number);
+    const dataHora = new Date(A,M-1,D,H,Mi);
+
+    const li = document.createElement("li");
+    li.innerHTML = `${a.data} ${a.hora}<br>${a.nome}`;
+
+    if (dataHora >= agora) {
+      const btn = document.createElement("button");
+      btn.textContent = "Remover";
+      btn.onclick = async () => {
+        await db.collection("agendamentos").doc(doc.id).delete();
+        carregarAdmin();
+      };
+      li.appendChild(btn);
+      listaAg.appendChild(li);
+    } else {
+      listaHist.appendChild(li);
+    }
+  });
+}
+
+/* ================= PWA – INSTALAR APP ================= */
+let deferredPrompt;
+const btnInstalar = $("btnInstalar");
+btnInstalar.style.display = "none";
+
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstalar.style.display = "block";
+});
+
+btnInstalar.onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const res = await deferredPrompt.userChoice;
+  if (res.outcome === "accepted") btnInstalar.style.display = "none";
+  deferredPrompt = null;
+};
+
+window.addEventListener("appinstalled", () => {
+  btnInstalar.style.display = "none";
 });
 
 });
