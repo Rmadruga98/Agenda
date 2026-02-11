@@ -87,12 +87,21 @@ async function carregarHorarios(data) {
   horariosDiv.innerHTML = "";
   horaInput.value = "";
 
-  const dia = new Date(data + "T00:00").getDay();
+  // ===== DATAS LIBERADAS MANUALMENTE =====
+const datasLiberadas = [
+  "2026-02-15"
+];
+
+const dia = new Date(data + "T00:00").getDay();
+
+// Se for exceção, libera mesmo sendo domingo ou segunda
+if (!datasLiberadas.includes(data)) {
   if (dia === 0 || dia === 1) {
     alert("Não atendemos domingo e segunda");
     dataInput.value = "";
     return;
   }
+}
 
   const snap = await db.collection("agendamentos").where("data","==",data).get();
   const ocupados = snap.docs.map(d => d.data().hora);
@@ -149,8 +158,7 @@ formAgendamento.onsubmit = async e => {
 💰 R$ ${agendamento.preco}
 
 ⚠️ *Observação:*
-Chegar com 5 minutos de antecedência.
-Cancelamentos avisar com no
+Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA.
 `;
 
   window.open(
