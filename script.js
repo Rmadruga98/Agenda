@@ -125,7 +125,7 @@ formAgendamento.onsubmit = async e => {
 
   const { telefone } = JSON.parse(localStorage.getItem("verificacaoWhats"));
 
-  await db.collection("agendamentos").add({
+  const agendamento = {
     nome: $("nome").value,
     telefone,
     data: dataInput.value,
@@ -133,9 +133,33 @@ formAgendamento.onsubmit = async e => {
     servico: $("servico").value,
     preco: servicos[$("servico").value],
     criadoEm: new Date()
-  });
+  };
+
+  // salva no Firestore
+  await db.collection("agendamentos").add(agendamento);
+
+  // 🔥 ENVIA PARA O WHATSAPP DA BARBEARIA
+  const msgBarbearia = `
+📌 *NOVO AGENDAMENTO*
+👤 ${agendamento.nome}
+📱 ${agendamento.telefone}
+📅 ${agendamento.data}
+⏰ ${agendamento.hora}
+✂️ ${agendamento.servico}
+💰 R$ ${agendamento.preco}
+
+⚠️ *Observação:*
+Chegar com 5 minutos de antecedência.
+Cancelamentos avisar com no
+`;
+
+  window.open(
+    `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msgBarbearia)}`,
+    "_blank"
+  );
 
   alert("Agendamento confirmado!");
+
   formAgendamento.reset();
   horariosDiv.innerHTML = "";
   precoInput.value = "";
