@@ -146,13 +146,33 @@ formAgendamento.onsubmit = async e => {
 
   // salva no Firestore
   await db.collection("agendamentos").add(agendamento);
+  
+  function formatarDataCompleta(dataISO) {
+  const dias = [
+    "Domingo",
+    "Segunda-feira",
+    "Terça-feira",
+    "Quarta-feira",
+    "Quinta-feira",
+    "Sexta-feira",
+    "Sábado"
+  ];
+
+  const [ano, mes, dia] = dataISO.split("-").map(Number);
+  const data = new Date(ano, mes - 1, dia);
+
+  const diaSemana = dias[data.getDay()];
+  const dataBR = data.toLocaleDateString("pt-BR");
+
+  return `${diaSemana} - ${dataBR}`;
+}
 
   // 🔥 ENVIA PARA O WHATSAPP DA BARBEARIA
   const msgBarbearia = `
 📌 *NOVO AGENDAMENTO*
 👤 ${agendamento.nome}
 📱 ${agendamento.telefone}
-📅 ${agendamento.data}
+📅 ${formatarDataCompleta(agendamento.data)}
 ⏰ ${agendamento.hora}
 ✂️ ${agendamento.servico}
 💰 R$ ${agendamento.preco}
