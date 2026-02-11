@@ -32,11 +32,11 @@ const inputTelefoneVerificacao = $("telefoneVerificacao");
 const formAgendamento = $("formAgendamento");
 
 const LIMITE = 1000 * 60 * 60 * 24 * 30; // 30 dias
-const dados = localStorage.getItem("verificacaoWhats");
+const dadosSalvos = localStorage.getItem("verificacaoWhats");
 
-if (dados) {
-  const { data } = JSON.parse(dados);
-  if (Date.now() - data < LIMITE) {
+if (dadosSalvos) {
+  const dados = JSON.parse(dadosSalvos);
+  if (Date.now() - dados.data < LIMITE) {
     divVerificacao.style.display = "none";
     formAgendamento.style.display = "block";
   } else {
@@ -49,10 +49,9 @@ if (dados) {
   formAgendamento.style.display = "none";
 }
 
-btnConfirmarTelefone.addEventListener("click", e => {
-  e.preventDefault();
-
+btnConfirmarTelefone.addEventListener("click", () => {
   const telefone = inputTelefoneVerificacao.value.replace(/\D/g, "");
+
   if (telefone.length < 10 || telefone.length > 11) {
     alert("Digite um WhatsApp válido com DDD");
     return;
@@ -111,6 +110,7 @@ async function carregarHorarios(data) {
 
   for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
     if (h === 12) continue;
+
     const hora = String(h).padStart(2,"0") + ":00";
     if (ocupados.includes(hora)) continue;
 
@@ -133,9 +133,20 @@ dataInput.addEventListener("change", () => {
 
 formAgendamento.addEventListener("submit", async e => {
   e.preventDefault();
-  if (!horaInput.value) return alert("Selecione um horário");
 
-  const { telefone } = JSON.parse(localStorage.getItem("verificacaoWhats"));
+  if (!horaInput.value) {
+    alert("Selecione um horário");
+    return;
+  }
+
+  const dados = localStorage.getItem("verificacaoWhats");
+  if (!dados) {
+    alert("Confirme seu WhatsApp para continuar");
+    location.reload();
+    return;
+  }
+
+  const { telefone } = JSON.parse(dados);
 
   await db.collection("agendamentos").add({
     nome: $("nome").value,
@@ -162,4 +173,5 @@ formAgendamento.addEventListener("submit", async e => {
   horariosDiv.innerHTML = "";
   precoInput.value = "";
 });
+
 });
