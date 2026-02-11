@@ -245,5 +245,64 @@ btnInstalar.onclick = async () => {
 window.addEventListener("appinstalled", () => {
   btnInstalar.style.display = "none";
 });
+/* ================= LIMPAR HISTÓRICO ================= */
+
+const btnLimparHistorico = document.getElementById("btnLimparHistorico");
+
+if (btnLimparHistorico) {
+  btnLimparHistorico.addEventListener("click", async () => {
+
+    if (!confirm("Apagar TODO o histórico? Essa ação não pode ser desfeita.")) {
+      return;
+    }
+
+    try {
+
+      const agora = new Date();
+      agora.setSeconds(0, 0);
+
+      const snapshot = await db.collection("agendamentos").get();
+
+      if (snapshot.empty) {
+        alert("Nenhum histórico encontrado.");
+        return;
+      }
+
+      const batch = db.batch();
+      let apagou = false;
+
+      snapshot.forEach(doc => {
+        const a = doc.data();
+
+        if (!a.data || !a.hora) return;
+
+        const [A, M, D] = a.data.split("-").map(Number);
+        const [H, Mi] = a.hora.split(":").map(Number);
+        const dataHora = new Date(A, M - 1, D, H, Mi);
+
+        // só apaga agendamentos PASSADOS
+        if (dataHora < agora) {
+          batch.delete(doc.ref);
+          apagou = true;
+        }
+      });
+
+      if (!apagou) {
+        alert("Nenhum histórico para apagar.");
+        return;
+      }
+
+      await batch.commit();
+
+      alert("Histórico apagado com sucesso!");
+      carregarAdmin();
+
+    } catch (erro) {
+      console.error("Erro ao apagar histórico:", erro);
+      alert("Erro ao apagar histórico. Veja o console.");
+    }
+
+  });
+}
 
 });
