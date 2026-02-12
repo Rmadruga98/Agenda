@@ -17,7 +17,7 @@
 <div class="container">
 
   <div class="logo-wrapper">
-    <img src="logo.png" class="logo">
+    <img src="logo.png" class="logo" alt="Logo da Barbearia Madruga">
   </div>
 
   <h1>Agendamento Online 💈</h1>
@@ -28,26 +28,26 @@
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
   <!-- 🔐 VERIFICAÇÃO DE TELEFONE -->
-<div id="verificacaoTelefone">
-  <label>Digite seu WhatsApp para continuar:</label>
-  <input id="telefoneVerificacao" placeholder="11999999999">
-  <button id="btnConfirmarTelefone" type="button">Confirmar número</button>
-</div>
+  <div id="verificacaoTelefone">
+    <label for="telefoneVerificacao">Digite seu WhatsApp para continuar:</label>
+    <input id="telefoneVerificacao" placeholder="11999999999" type="tel" pattern="[0-9]{11}" required>
+    <button id="btnConfirmarTelefone" type="button">Confirmar número</button>
+  </div>
 
   <!-- 📅 FORMULÁRIO (COMEÇA ESCONDIDO) -->
-  <form id="formAgendamento" style="display:none;">
+  <form id="formAgendamento" style="display:none;" method="post" action="submit_agendamento.php">
 
-    <label>Nome:</label>
+    <label for="nome">Nome:</label>
     <input id="nome" required>
 
-    <label>Data:</label>
-    <input type="date" id="data" required>
+    <label for="data">Data:</label>
+    <input type="date" id="data" required min="<?php echo date('Y-m-d'); ?>">
 
-    <label>Horário:</label>
+    <label for="horarios">Horário:</label>
     <div id="horarios" class="horarios"></div>
-    <input type="hidden" id="hora">
+    <input type="hidden" id="hora" name="hora">
 
-    <label>Serviço:</label>
+    <label for="servico">Serviço:</label>
     <select id="servico" required>
       <option disabled selected>Selecione</option>
       <option>Corte Simples</option>
@@ -63,10 +63,10 @@
       <option>Platinado + Corte</option>
     </select>
 
-    <label>Preço:</label>
-    <input id="preco" readonly>
+    <label for="preco">Preço:</label>
+    <input id="preco" readonly type="text">
 
-    <button>Agendar</button>
+    <button type="submit">Agendar</button>
   </form>
 
   <!-- 🔒 ADMIN -->
