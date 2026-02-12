@@ -169,7 +169,7 @@ formAgendamento.onsubmit = async e => {
 
   // 🔥 ENVIA PARA O WHATSAPP DA BARBEARIA
   const msgBarbearia = `
-📌 *NOVO AGENDAMENTO*
+* NOVO AGENDAMENTO 
 👤 ${agendamento.nome}
 📱 ${agendamento.telefone}
 📅 ${formatarDataCompleta(agendamento.data)}

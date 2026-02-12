@@ -1,4 +1,4 @@
-const CACHE_NAME = "agenda-madruga-v31";
+const CACHE_NAME = "agenda-madruga-v33";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
