@@ -18,8 +18,10 @@ body {
 
 /* Logo */
 .logo-wrapper {
-  width: 260px;
-  height: 260px;
+  width: 75vw;
+  height: 75vw;
+  max-width: 320px;
+  max-height: 320px;
   margin: auto;
   border-radius: 50%;
   background: #111;
@@ -29,7 +31,7 @@ body {
 }
 
 .logo {
-  max-width: 100%;
+  width: 90%;
 }
 
 /* Títulos */
