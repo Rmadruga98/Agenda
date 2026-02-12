@@ -89,7 +89,7 @@ async function carregarHorarios(data) {
 
   // ===== DATAS LIBERADAS MANUALMENTE =====
 const datasLiberadas = [
-  "2026-02-15"
+  "2026-02-16"
 ];
 
 const dia = new Date(data + "T00:00").getDay();
