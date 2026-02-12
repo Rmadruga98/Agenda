@@ -18,8 +18,8 @@ body {
 
 /* Logo */
 .logo-wrapper {
-  width: 200px;
-  height: 200px;
+  width: 260px;
+  height: 260px;
   margin: auto;
   border-radius: 50%;
   background: #111;
@@ -29,13 +29,14 @@ body {
 }
 
 .logo {
-  max-width: 85%;
+  max-width: 100%;
 }
 
 /* Títulos */
 h1 {
   color: #fff;
   margin: 15px 0;
+  font-size: 22px;
 }
 
 .barber-nome {
