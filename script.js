@@ -69,11 +69,21 @@ $("servico").addEventListener("change", e => {
 });
 
 /* ===== HORÁRIOS ===== */
-async function carregarHorarios(data) {
+  async function carregarHorarios(data) {
   horariosDiv.innerHTML = "";
   horaInput.value = "";
 
-  const dia = new Date(data + "T00:00").getDay();
+// 🔒 Verifica se o dia está bloqueado
+const bloqueado = await db.collection("diasBloqueados").doc(data).get();
+if (bloqueado.exists) {
+  alert("Este dia está bloqueado para agendamento.");
+  dataInput.value = "";
+  return;
+}
+  const hoje = new Date();
+  const dataSelecionada = new Date(data + "T00:00");
+
+  const dia = dataSelecionada.getDay();
   if (dia === 0 || dia === 1) {
     alert("Não atendemos domingo e segunda");
     dataInput.value = "";
@@ -90,6 +100,24 @@ async function carregarHorarios(data) {
     if (h === 12) continue;
 
     const hora = String(h).padStart(2, "0") + ":00";
+
+    // 🔒 BLOQUEIO 15 MINUTOS
+    const dataHora = new Date(
+      dataSelecionada.getFullYear(),
+      dataSelecionada.getMonth(),
+      dataSelecionada.getDate(),
+      h,
+      15 // 15 minutos de tolerância
+    );
+
+    // se for hoje e já passou 15 minutos do horário
+    if (
+      dataSelecionada.toDateString() === hoje.toDateString() &&
+      hoje > dataHora
+    ) {
+      continue;
+    }
+
     if (ocupados.includes(hora)) continue;
 
     const btn = document.createElement("button");
@@ -188,6 +216,37 @@ btnAdmin.addEventListener("click", async () => {
 btnSairAdmin.addEventListener("click", () => {
   areaAdmin.style.display = "none";
   btnAdmin.style.display = "block";
+});
+
+/* ===== BLOQUEIO DE DIA (ADMIN) ===== */
+
+const dataBloqueioInput = $("dataBloqueio");
+const btnBloquearDia = $("btnBloquearDia");
+const btnDesbloquearDia = $("btnDesbloquearDia");
+
+// 🔒 Bloquear dia
+btnBloquearDia.addEventListener("click", async () => {
+  const data = dataBloqueioInput.value;
+  if (!data) return alert("Selecione uma data");
+
+  await db.collection("diasBloqueados").doc(data).set({
+    bloqueado: true,
+    criadoEm: new Date()
+  });
+
+  alert("Dia bloqueado com sucesso!");
+  dataBloqueioInput.value = "";
+});
+
+// 🔓 Desbloquear dia
+btnDesbloquearDia.addEventListener("click", async () => {
+  const data = dataBloqueioInput.value;
+  if (!data) return alert("Selecione uma data");
+
+  await db.collection("diasBloqueados").doc(data).delete();
+
+  alert("Dia desbloqueado com sucesso!");
+  dataBloqueioInput.value = "";
 });
 
 // carregar agenda + histórico
