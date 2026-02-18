@@ -39,6 +39,7 @@ h1 {
   font-size: clamp(18px, 4vw, 22px);
 }
 
+
 .barber-nome {
   font-family: 'Anton', sans-serif;
   color: #f5b400;
@@ -126,6 +127,10 @@ button:active {
 
 #listaAgendamentos button {
   background: #d9534f;
+}
+
+.controle-dias {
+  color: #ffffff;
 }
 
 /* Rodapé */

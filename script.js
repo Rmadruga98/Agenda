@@ -346,4 +346,52 @@ window.addEventListener("appinstalled", () => {
   btnInstalar.style.display = "none";
 });
 
+/* ================= APAGAR HISTÓRICO ================= */
+const btnLimparHistorico = $("btnLimparHistorico");
+
+if (btnLimparHistorico) {
+  btnLimparHistorico.addEventListener("click", async () => {
+
+    if (!confirm("Tem certeza que deseja apagar todo o histórico?")) {
+      return;
+    }
+
+    const agora = new Date();
+    agora.setSeconds(0, 0);
+
+    const snapshot = await db.collection("agendamentos").get();
+
+    if (snapshot.empty) {
+      alert("Nenhum histórico para apagar.");
+      return;
+    }
+
+    const batch = db.batch();
+    let apagou = false;
+
+    snapshot.forEach(doc => {
+      const a = doc.data();
+
+      const [A, M, D] = a.data.split("-").map(Number);
+      const [H, Mi] = a.hora.split(":").map(Number);
+      const dataHora = new Date(A, M - 1, D, H, Mi);
+
+      if (dataHora < agora) {
+        batch.delete(doc.ref);
+        apagou = true;
+      }
+    });
+
+    if (!apagou) {
+      alert("Nenhum histórico para apagar.");
+      return;
+    }
+
+    await batch.commit();
+
+    alert("Histórico apagado com sucesso!");
+    carregarAdmin();
+  });
+}
+
 });
