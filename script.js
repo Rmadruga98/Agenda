@@ -56,6 +56,11 @@ const dataInput = $("data");
 const precoInput = $("preco");
 const form = $("formAgendamento");
 
+// 🔒 Bloquear datas anteriores a hoje
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0);
+dataInput.min = hoje.toISOString().split("T")[0];
+
 /* ===== PREÇO ===== */
 $("servico").addEventListener("change", e => {
   precoInput.value = servicos[e.target.value]
@@ -104,6 +109,13 @@ async function carregarHorarios(data) {
 }
 
 dataInput.addEventListener("change", () => {
+  const selecionada = new Date(dataInput.value + "T00:00");
+
+if (selecionada < hoje) {
+  alert("Não é possível agendar datas passadas.");
+  dataInput.value = "";
+  return;
+}
   if (dataInput.value) carregarHorarios(dataInput.value);
 });
 
@@ -128,7 +140,7 @@ form.addEventListener("submit", async e => {
     `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
 `📌 NOVO AGENDAMENTO
 👤 ${ag.nome}
-📅 ${formatarDataComDia(ag.data)}
+📅 ${formatarDataComDia(dataInput.value)}
 ⏰ ${ag.hora}
 ✂️ ${ag.servico}
 💰 R$ ${ag.preco}`
