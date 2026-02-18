@@ -1,40 +1,29 @@
-const CACHE_NAME = "agenda-madruga-v40";
+const CACHE_NAME = "agenda-madruga-v41";
+const FILES = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./manifest.json",
+  "./logo.png",
+  "./logo-192.png",
+  "./logo-512.png"
+];
 
-self.addEventListener("install", event => {
+self.addEventListener("install", e=>{
+  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(FILES)));
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll([
-        "./",
-        "./index.html",
-        "./style.css",
-        "./script.js",
-        "./manifest.json",
-        "./logo.png"
-      ])
-    )
-  );
 });
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
+self.addEventListener("activate", e=>{
+  e.waitUntil(
+    caches.keys().then(keys=>Promise.all(
+      keys.map(k=>k!==CACHE_NAME && caches.delete(k))
+    ))
   );
   self.clients.claim();
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(response => response)
-      .catch(() => caches.match(event.request))
-  );
+self.addEventListener("fetch", e=>{
+  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
 });

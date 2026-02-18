@@ -1,11 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ================= CONFIG ================= */
   const WHATSAPP = "5535998066403";
- const HORA_ABERTURA = 8;
+  const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
-  /* ================= SERVIÇOS ================= */
   const servicos = {
     "Corte Simples": 30,
     "Corte Degradê": 35,
@@ -23,242 +21,115 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = id => document.getElementById(id);
   const db = window.db;
 
-  /* ================= VERIFICAÇÃO WHATS (30 DIAS) ================= */
-  const divVerificacao = $("verificacaoTelefone");
-  const btnConfirmarTelefone = $("btnConfirmarTelefone");
-  const inputTelefoneVerificacao = $("telefoneVerificacao");
-  const formAgendamento = $("formAgendamento");
-
+  /* WHATS */
   const LIMITE = 1000 * 60 * 60 * 24 * 30;
-  const dadosSalvos = localStorage.getItem("verificacaoWhats");
+  const dados = JSON.parse(localStorage.getItem("verificacaoWhats") || "null");
 
-  if (dadosSalvos) {
-    const dados = JSON.parse(dadosSalvos);
-    if (Date.now() - dados.data < LIMITE) {
-      divVerificacao.style.display = "none";
-      formAgendamento.style.display = "block";
-    } else {
-      localStorage.removeItem("verificacaoWhats");
-      divVerificacao.style.display = "block";
-      formAgendamento.style.display = "none";
-    }
-  } else {
-    divVerificacao.style.display = "block";
-    formAgendamento.style.display = "none";
+  if (dados && Date.now() - dados.data < LIMITE) {
+    $("verificacaoTelefone").style.display = "none";
+    $("formAgendamento").style.display = "block";
   }
 
-  btnConfirmarTelefone.onclick = e => {
-    e.preventDefault();
-    const telefone = inputTelefoneVerificacao.value.replace(/\D/g, "");
-    if (telefone.length !== 11) { // Brazilian phone number standard
-      alert("Digite um WhatsApp válido com 11 dígitos");
-      return;
-    }
+  $("btnConfirmarTelefone").onclick = () => {
+    const tel = $("telefoneVerificacao").value.replace(/\D/g,"");
+    if (tel.length !== 11) return alert("WhatsApp inválido");
 
-    localStorage.setItem("verificacaoWhats", JSON.stringify({
-      telefone,
-      data: Date.now()
-    }));
-
-    window.open(`https://wa.me/55${telefone}`, "_blank");
-
-    divVerificacao.style.display = "none";
-    formAgendamento.style.display = "block";
+    localStorage.setItem("verificacaoWhats", JSON.stringify({telefone:tel,data:Date.now()}));
+    $("verificacaoTelefone").style.display="none";
+    $("formAgendamento").style.display="block";
   };
 
-  /* ================= AGENDAMENTO ================= */
-  const horariosDiv = $("horarios");
-  const horaInput = $("hora");
-  const dataInput = $("data");
-  const precoInput = $("preco");
-
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-  dataInput.min = hoje.toISOString().split("T")[0];
-
+  /* PREÇO */
   $("servico").onchange = e => {
-    precoInput.value = servicos[e.target.value] ? `R$ ${servicos[e.target.value]}` : "";
+    $("preco").value = servicos[e.target.value] ? `R$ ${servicos[e.target.value]}` : "";
   };
 
-  async function carregarHorarios(data) {
-    try {
-      horariosDiv.innerHTML = "";
-      horaInput.value = "";
+  /* DATA */
+  $("data").onchange = () => carregarHorarios($("data").value);
 
-      const datasLiberadas = [new Date().toISOString().split("T")[0]]; // Today's date
-      const dia = new Date(data + "T00:00").getDay();
-      if (!datasLiberadas.includes(data)) {
-        if (dia === 0 || dia === 1) {
-          alert("Não atendemos domingo e segunda");
-          dataInput.value = "";
-          return;
-        }
-      }
+  async function carregarHorarios(data){
+    $("horarios").innerHTML="";
+    const snap = await db.collection("agendamentos").where("data","==",data).get();
+    const ocupados = snap.docs.map(d=>d.data().hora);
 
-      const snap = await db.collection("agendamentos")
-        .where("data", "==", data)
-        .get();
+    for(let h=HORA_ABERTURA;h<HORA_FECHAMENTO;h++){
+      if(h===12) continue;
+      const hora=`${String(h).padStart(2,"0")}:00`;
+      if(ocupados.includes(hora)) continue;
 
-      const ocupados = snap.docs.map(d => d.data().hora);
-
-      const agora = new Date();
-      const hojeISO = agora.toISOString().split("T")[0];
-
-      for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
-        if (h === 12) continue;
-
-        const hora = String(h).padStart(2, "0") + ":00";
-        if (ocupados.includes(hora)) continue;
-
-        /* 🔒 BLOQUEIO DE HORÁRIOS PASSADOS (ÚNICA ALTERAÇÃO) */
-        if (data === hojeISO) {
-          const [H] = hora.split(":").map(Number);
-          if (H <= agora.getHours()) continue;
-        }
-        /* 🔒 FIM DO BLOQUEIO */
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "hora-btn";
-        btn.textContent = hora;
-
-        btn.onclick = () => {
-          document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
-          btn.classList.add("ativa");
-          horaInput.value = hora;
-        };
-
-        horariosDiv.appendChild(btn);
-      }
-    } catch (error) {
-      console.error("Error loading times:", error);
-      alert("Ocorreu um erro ao carregar os horários, tente novamente mais tarde.");
+      const b=document.createElement("button");
+      b.textContent=hora;
+      b.onclick=()=>{$("hora").value=hora;};
+      $("horarios").appendChild(b);
     }
   }
 
-  dataInput.onchange = () => {
-    if (dataInput.value) carregarHorarios(dataInput.value);
-  };
-
-  formAgendamento.onsubmit = async e => {
+  $("formAgendamento").onsubmit = async e => {
     e.preventDefault();
-    if (!horaInput.value) return alert("Selecione um horário");
-
-    const { telefone } = JSON.parse(localStorage.getItem("verificacaoWhats"));
-
-    const agendamento = {
-      nome: $("nome").value,
-      telefone,
-      data: dataInput.value,
-      hora: horaInput.value,
-      servico: $("servico").value,
-      preco: servicos[$("servico").value],
-      criadoEm: new Date()
-    };
-
-    try {
-      await db.collection("agendamentos").add(agendamento);
-
-      const msgBarbearia = `
-*NOVO AGENDAMENTO*
-👤 ${agendamento.nome}
-📱 ${agendamento.telefone}
-📅 ${agendamento.data}
-⏰ ${agendamento.hora}
-✂️ ${agendamento.servico}
-💰 R$ ${agendamento.preco}
-
-⚠️ *Observação:*
-Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA.
-`;
-
-      window.open(
-        `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msgBarbearia)}`,
-        "_blank"
-      );
-
-      alert("Agendamento confirmado!");
-      formAgendamento.reset();
-      horariosDiv.innerHTML = "";
-      precoInput.value = "";
-    } catch (error) {
-      console.error("Error scheduling appointment:", error);
-      alert("Ocorreu um erro ao confirmar o agendamento, tente novamente.");
-    }
+    await db.collection("agendamentos").add({
+      nome:$("nome").value,
+      telefone:JSON.parse(localStorage.getItem("verificacaoWhats")).telefone,
+      data:$("data").value,
+      hora:$("hora").value,
+      servico:$("servico").value,
+      preco:servicos[$("servico").value],
+      criadoEm:new Date()
+    });
+    window.open(`https://wa.me/${WHATSAPP}`);
+    alert("Agendado!");
+    e.target.reset();
   };
-  /* ================= ADMIN SEGURO (FIREBASE) ================= */
 
-async function verificarSenhaAdmin(senhaDigitada) {
-  try {
-    const docRef = db.collection("config").doc("admin");
-    const docSnap = await docRef.get();
-
-    if (!docSnap.exists) {
-      alert("Configuração de admin não encontrada.");
-      return false;
-    }
-
-    const senhaCorreta = docSnap.data().senha;
-    return senhaDigitada === senhaCorreta;
-
-  } catch (erro) {
-    console.error("Erro ao verificar senha admin:", erro);
-    alert("Erro ao verificar admin.");
-    return false;
+  /* ===== ADMIN ===== */
+  async function verificarSenhaAdmin(senha){
+    const d=await db.collection("config").doc("admin").get();
+    return d.exists && senha===d.data().senha;
   }
-}
 
-/* ================= ENTRAR NO MODO ADMIN ================= */
+  function solicitarSenhaAdmin(){
+    const s=prompt("Senha admin:");
+    if(!s) return;
+    verificarSenhaAdmin(s).then(ok=>{
+      if(ok) abrirAdmin();
+      else alert("Senha incorreta");
+    });
+  }
 
-function entrarModoAdmin() {
-  alert("Modo admin ativado 🔓");
-
-  // Aqui você pode:
-  // - Mostrar botões&&  ocultos
-  // - Liberar exclusão
-  // - Liberar painel admin
-}
-
-/* ================= ACESSO ADMIN (GATILHO) ================= */
-
-let tempoPressionado = null;
-const logo = document.querySelector(".logo");
-
-if (logo) {
-  logo.addEventListener("touchstart", () => {
-    tempoPressionado = setTimeout(() => {
-      solicitarSenhaAdmin();
-    }, 3000);
+  /* GATILHO 3 TOQUES */
+  let toques=0,timer;
+  $("tituloApp").addEventListener("touchend",()=>{
+    toques++;
+    if(toques===1) timer=setTimeout(()=>toques=0,2000);
+    if(toques===3){clearTimeout(timer);toques=0;solicitarSenhaAdmin();}
   });
 
-  logo.addEventListener("touchend", () => {
-    clearTimeout(tempoPressionado);
-  });
+  /* MODAL */
+  function abrirAdmin(){
+    $("adminModal").style.display="flex";
+    const hoje=new Date().toISOString().split("T")[0];
+    $("adminData").value=hoje;
+    carregarAgenda(hoje);
+  }
 
-  logo.addEventListener("mousedown", () => {
-    tempoPressionado = setTimeout(() => {
-      solicitarSenhaAdmin();
-    }, 3000);
-  });
+  $("fecharAdmin").onclick=()=>$("adminModal").style.display="none";
+  $("sairAdmin").onclick=()=>$("adminModal").style.display="none";
 
-  logo.addEventListener("mouseup", () => {
-    clearTimeout(tempoPressionado);
-  });
-}
+  $("adminData").onchange=()=>carregarAgenda($("adminData").value);
 
-/* ================= LOGIN ADMIN ================= */
+  async function carregarAgenda(data){
+    $("adminLista").innerHTML="...";
+    const snap=await db.collection("agendamentos").where("data","==",data).orderBy("hora").get();
+    $("adminLista").innerHTML="";
+    snap.forEach(doc=>{
+      const a=doc.data();
+      $("adminLista").innerHTML+=`
+        <div>
+          <b>${a.hora}</b> - ${a.nome}<br>
+          ${a.servico}<br>
+          <button onclick="window.open('https://wa.me/55${a.telefone}')">Whats</button>
+          <button onclick="db.collection('agendamentos').doc('${doc.id}').delete().then(()=>carregarAgenda('${data}'))">Cancelar</button>
+        </div><hr>`;
+    });
+  }
 
-function solicitarSenhaAdmin() {
-  const senhaDigitada = prompt("Digite a senha de administrador:");
-
-  if (!senhaDigitada) return;
-
-  verificarSenhaAdmin(senhaDigitada).then((autorizado) => {
-    if (autorizado) {
-      entrarModoAdmin();
-    } else {
-      alert("Senha incorreta");
-    }
-  });
-}
 });
