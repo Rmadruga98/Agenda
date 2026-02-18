@@ -2,8 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= CONFIG ================= */
   const WHATSAPP = "5535998066403";
-  const SENHA_ADMIN = "madruga123"; // Consider removing for production.
-  const HORA_ABERTURA = 8;
+ const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
   /* ================= SERVIÇOS ================= */
@@ -187,4 +186,36 @@ Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA.
       alert("Ocorreu um erro ao confirmar o agendamento, tente novamente.");
     }
   };
+  /* ================= ADMIN SEGURO (FIREBASE) ================= */
+
+async function verificarSenhaAdmin(senhaDigitada) {
+  try {
+    const docRef = db.collection("config").doc("admin");
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      alert("Configuração de admin não encontrada.");
+      return false;
+    }
+
+    const senhaCorreta = docSnap.data().senha;
+    return senhaDigitada === senhaCorreta;
+
+  } catch (erro) {
+    console.error("Erro ao verificar senha admin:", erro);
+    alert("Erro ao verificar admin.");
+    return false;
+  }
+}
+
+/* ================= ENTRAR NO MODO ADMIN ================= */
+
+function entrarModoAdmin() {
+  alert("Modo admin ativado 🔓");
+
+  // Aqui você pode:
+  // - Mostrar botões&&  ocultos
+  // - Liberar exclusão
+  // - Liberar painel admin
+}
 });
