@@ -218,4 +218,47 @@ function entrarModoAdmin() {
   // - Liberar exclusão
   // - Liberar painel admin
 }
+
+/* ================= ACESSO ADMIN (GATILHO) ================= */
+
+let tempoPressionado = null;
+const logo = document.querySelector(".logo");
+
+if (logo) {
+  logo.addEventListener("touchstart", () => {
+    tempoPressionado = setTimeout(() => {
+      solicitarSenhaAdmin();
+    }, 3000);
+  });
+
+  logo.addEventListener("touchend", () => {
+    clearTimeout(tempoPressionado);
+  });
+
+  logo.addEventListener("mousedown", () => {
+    tempoPressionado = setTimeout(() => {
+      solicitarSenhaAdmin();
+    }, 3000);
+  });
+
+  logo.addEventListener("mouseup", () => {
+    clearTimeout(tempoPressionado);
+  });
+}
+
+/* ================= LOGIN ADMIN ================= */
+
+function solicitarSenhaAdmin() {
+  const senhaDigitada = prompt("Digite a senha de administrador:");
+
+  if (!senhaDigitada) return;
+
+  verificarSenhaAdmin(senhaDigitada).then((autorizado) => {
+    if (autorizado) {
+      entrarModoAdmin();
+    } else {
+      alert("Senha incorreta");
+    }
+  });
+}
 });
