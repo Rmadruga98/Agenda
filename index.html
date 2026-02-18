@@ -36,19 +36,18 @@
 
   <!-- 📅 FORMULÁRIO (COMEÇA ESCONDIDO) -->
   <form id="formAgendamento" style="display:none;" method="post" action="submit_agendamento.php">
-
     <label for="nome">Nome:</label>
-    <input id="nome" required>
+    <input id="nome" name="nome" required>
 
     <label for="data">Data:</label>
-    <input type="date" id="data" required min="<?php echo date('Y-m-d'); ?>">
+    <input type="date" id="data" name="data" required min="<?php echo date('Y-m-d'); ?>">
 
     <label for="horarios">Horário:</label>
     <div id="horarios" class="horarios"></div>
     <input type="hidden" id="hora" name="hora">
 
     <label for="servico">Serviço:</label>
-    <select id="servico" required>
+    <select id="servico" name="servico" required>
       <option disabled selected>Selecione</option>
       <option>Corte Simples</option>
       <option>Corte Degradê</option>
@@ -64,7 +63,7 @@
     </select>
 
     <label for="preco">Preço:</label>
-    <input id="preco" readonly type="text">
+    <input id="preco" name="preco" readonly type="text">
 
     <button type="submit">Agendar</button>
   </form>
@@ -102,6 +101,53 @@
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js");
 }
+
+document.getElementById('btnConfirmarTelefone').addEventListener('click', function() {
+  const telefone = document.getElementById('telefoneVerificacao').value;
+  if (telefone.match(/^\d{11}$/)) {
+    document.getElementById('verificacaoTelefone').style.display = 'none';
+    document.getElementById('formAgendamento').style.display = 'block';
+  } else {
+    alert('Por favor, digite um número de telefone válido com 11 dígitos.');
+  }
+});
+
+document.getElementById('servico').addEventListener('change', function() {
+  const precos = {
+    'Corte Simples': 'R$ 30,00',
+    'Corte Degradê': 'R$ 35,00',
+    'Corte Navalhado': 'R$ 40,00',
+    'Barba': 'R$ 20,00',
+    'Corte + Barba': 'R$ 55,00',
+    'Sobrancelha': 'R$ 10,00',
+    'Pezinho': 'R$ 15,00',
+    'Corte + Barba + Sobrancelha': 'R$ 60,00',
+    'Pigmentação + Corte': 'R$ 60,00',
+    'Luzes + Corte': 'R$ 75,00',
+    'Platinado + Corte': 'R$ 110,00'
+  };
+  const servico = this.value;
+  document.getElementById('preco').value = precos[servico] || '';
+});
+
+document.getElementById('formAgendamento').addEventListener('submit', function(event) {
+  event.preventDefault();
+  // Here you can add validations before actual submission
+  alert("Agendamento enviado!");
+  // You can now use AJAX or any other method to send the data if needed
+});
+
+document.getElementById('btnLimparHistorico').addEventListener('click', function() {
+  // Lógica para apagar histórico
+});
+
+document.getElementById('btnRelatorioDiario').addEventListener('click', function() {
+  // Lógica para enviar relatório do dia
+});
+
+document.getElementById('btnSairAdmin').addEventListener('click', function() {
+  // Lógica para sair da área do administrador
+});
 </script>
 
 </body>
