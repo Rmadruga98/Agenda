@@ -17,31 +17,28 @@
 <div class="container">
 
   <div class="logo-wrapper">
-    <img src="logo.png" class="logo" alt="Logo da Barbearia Madruga">
+    <img src="logo.png" class="logo">
   </div>
 
-  <h1 id="tituloApp">Agendamento Online 💈</h1>
+  <h1>Agendamento Online 💈</h1>
+
+  <button id="btnInstalar" class="btn-instalar">📲 Instalar aplicativo</button>
 
   <h3 class="barber-nome">Barber Madruga</h3>
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
-  <!-- VERIFICAÇÃO WHATS -->
-  <div id="verificacaoTelefone">
-    <label>Digite seu WhatsApp:</label>
-    <input id="telefoneVerificacao" type="tel" placeholder="11999999999">
-    <button id="btnConfirmarTelefone">Confirmar</button>
-  </div>
-
-  <!-- FORMULÁRIO -->
-  <form id="formAgendamento" style="display:none;">
+  <form id="formAgendamento">
     <label>Nome:</label>
     <input id="nome" required>
+
+    <label>WhatsApp:</label>
+    <input id="telefone" required placeholder="11999999999">
 
     <label>Data:</label>
     <input type="date" id="data" required>
 
     <label>Horário:</label>
-    <div id="horarios"></div>
+    <div id="horarios" class="horarios"></div>
     <input type="hidden" id="hora">
 
     <label>Serviço:</label>
@@ -63,25 +60,26 @@
     <label>Preço:</label>
     <input id="preco" readonly>
 
-    <button type="submit">Agendar</button>
+    <button>Agendar</button>
   </form>
 
-  <footer>© 2026 • Barber Madruga</footer>
-</div>
+  <!-- ADMIN -->
+  <button id="btnAdmin" style="display:none;">🔒 Área do Administrador</button>
 
-<!-- MODAL ADMIN -->
-<div id="adminModal" class="admin-modal">
-  <div class="admin-box">
-    <div class="admin-header">
-      <h2>🔒 Painel Admin</h2>
-      <button id="fecharAdmin">✖</button>
-    </div>
+  <div id="areaAdmin" style="display:none;">
+    <h2>📋 Agenda Ativa</h2>
+    <ul id="listaAgendamentos"></ul>
 
-    <input type="date" id="adminData">
-    <div id="adminLista"></div>
+    <h2>📚 Histórico</h2>
+    <ul id="listaHistorico"></ul>
 
-    <button id="sairAdmin">🚪 Sair</button>
+    <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
+    <button id="btnSairAdmin">❌ Sair</button>
   </div>
+
+  <footer class="rodape">
+    © 2026 • Barber Madruga
+  </footer>
 </div>
 
 <!-- Firebase -->
@@ -94,7 +92,7 @@
 
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+  navigator.serviceWorker.register("./service-worker.js");
 }
 </script>
 

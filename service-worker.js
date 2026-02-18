@@ -1,29 +1,38 @@
-const CACHE_NAME = "agenda-madruga-v42";
-const FILES = [
+const CACHE_NAME = "agenda-madruga-v11";
+
+const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.json",
-  "./logo.png",
-  "./logo-192.png",
-  "./logo-512.png"
+  "./logo.png"
 ];
 
-self.addEventListener("install", e=>{
-  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(FILES)));
+self.addEventListener("install", event => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+  );
 });
 
-self.addEventListener("activate", e=>{
-  e.waitUntil(
-    caches.keys().then(keys=>Promise.all(
-      keys.map(k=>k!==CACHE_NAME && caches.delete(k))
-    ))
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      )
+    )
   );
   self.clients.claim();
 });
 
-self.addEventListener("fetch", e=>{
-  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
