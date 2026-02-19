@@ -267,7 +267,6 @@ Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA. `
   /* ===== BLOQUEAR / DESBLOQUEAR DIA ===== */
 const dataBloqueioInput = $("dataBloqueio");
 const btnBloquearDia = $("btnBloquearDia");
-const btnDesbloquearDia = $("btnDesbloquearDia");
 
 if (btnBloquearDia) {
   btnBloquearDia.addEventListener("click", async () => {
@@ -285,18 +284,6 @@ if (btnBloquearDia) {
   });
 }
 
-if (btnDesbloquearDia) {
-  btnDesbloquearDia.addEventListener("click", async () => {
-    const data = dataBloqueioInput.value;
-    if (!data) return alert("Selecione uma data");
-
-    await db.collection("diasBloqueados").doc(data).delete();
-
-    alert("Dia desbloqueado com sucesso!");
-    dataBloqueioInput.value = "";
-    carregarDiasBloqueados();
-  });
-}
 /* ===== APAGAR HISTÓRICO ===== */
 const btnLimparHistorico = $("btnLimparHistorico");
 
