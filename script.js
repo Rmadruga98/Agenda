@@ -342,4 +342,48 @@ if (btnLimparHistorico) {
     carregarAdmin();
   });
 }
+
+/* ===== PWA – INSTALAR APP ===== */
+let deferredPrompt = null;
+const btnInstalar = $("btnInstalar");
+
+// Esconde inicialmente
+if (btnInstalar) {
+  btnInstalar.style.display = "none";
+
+  // Evento que libera instalação
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Só mostra se não estiver instalado
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      btnInstalar.style.display = "block";
+    }
+  });
+
+  // Clique no botão
+  btnInstalar.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      btnInstalar.style.display = "none";
+    }
+
+    deferredPrompt = null;
+  });
+
+  // Se já estiver instalado
+  window.addEventListener("appinstalled", () => {
+    btnInstalar.style.display = "none";
+  });
+
+  // Se abrir já instalado (modo app)
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    btnInstalar.style.display = "none";
+  }
+}
 });
