@@ -1,19 +1,19 @@
 {
   "name": "Barbearia Madruga",
   "short_name": "Madruga",
-  "start_url": "/Agenda/index.html",
-  "scope": "/Agenda/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#1c1c1c",
   "icons": [
     {
-      "src": "/Agenda/logo.png",
+      "src": "./logo-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/Agenda/logo.png",
+      "src": "./logo-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

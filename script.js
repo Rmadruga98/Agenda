@@ -397,4 +397,44 @@ if (btnRelatorio) {
 
 }
 
+/* ===== PWA – INSTALAR APP ===== */
+
+let deferredPrompt = null;
+const btnInstalar = $("btnInstalar");
+
+if (btnInstalar) {
+
+  btnInstalar.style.display = "none";
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      btnInstalar.style.display = "block";
+    }
+  });
+
+  btnInstalar.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      btnInstalar.style.display = "none";
+    }
+
+    deferredPrompt = null;
+  });
+
+  window.addEventListener("appinstalled", () => {
+    btnInstalar.style.display = "none";
+  });
+
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    btnInstalar.style.display = "none";
+  }
+}
+
 });
