@@ -133,6 +133,14 @@ button:active {
   color: #ffffff;
 }
 
+.dia-bloqueado {
+  opacity: 0.5;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #aaa;
+}
+
 /* Rodapé */
 .rodape {
   margin-top: 30px;
@@ -221,4 +229,16 @@ button:active {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+#areaAdmin {
+  color: #ffffff;
+}
+
+#areaAdmin h2,
+#areaAdmin h3,
+#areaAdmin p,
+#areaAdmin label,
+#areaAdmin li {
+  color: #ffffff;
 }

@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <title>Agendamento - Barbearia Madruga</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1c1c">
   <link rel="icon" href="logo.png">
-
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -17,32 +15,32 @@
 <div class="container">
 
   <div class="logo-wrapper">
-    <img src="logo.png" class="logo">
+    <img src="logo.png" alt="Logo da Barbearia Madruga" class="logo">
   </div>
 
   <h1>Agendamento Online 💈</h1>
 
-  <button id="btnInstalar" class="btn-instalar">📲 Instalar aplicativo</button>
+  <button id="btnInstalar" class="btn-instalar" aria-label="Instalar aplicativo">📲 Instalar aplicativo</button>
 
   <h3 class="barber-nome">Barber Madruga</h3>
   <p class="barbeiro-nome">Barbeiro Ricardo</p>
 
-  <form id="formAgendamento">
-    <label>Nome:</label>
-    <input id="nome" required>
+  <form id="formAgendamento" aria-labelledby="formAgendamento">
+    <label for="nome">Nome:</label>
+    <input id="nome" name="nome" type="text" required aria-required="true" placeholder="Digite seu nome">
 
-    <label>WhatsApp:</label>
-    <input id="telefone" required placeholder="11999999999">
+    <label for="telefone">WhatsApp:</label>
+    <input id="telefone" name="telefone" type="tel" required aria-required="true" placeholder="11999999999" pattern="[0-9]{11}">
 
-    <label>Data:</label>
-    <input type="date" id="data" required>
+    <label for="data">Data:</label>
+    <input type="date" id="data" name="data" required aria-required="true">
 
-    <label>Horário:</label>
-    <div id="horarios" class="horarios"></div>
-    <input type="hidden" id="hora">
+    <label for="hora">Horário:</label>
+    <div id="horarios" class="horarios" aria-label="Selecione um horário disponível"></div>
+    <input type="hidden" id="hora" name="hora">
 
-    <label>Serviço:</label>
-    <select id="servico" required>
+    <label for="servico">Serviço:</label>
+    <select id="servico" name="servico" required aria-required="true">
       <option disabled selected>Selecione</option>
       <option>Corte Simples</option>
       <option>Corte Degradê</option>
@@ -57,14 +55,14 @@
       <option>Platinado + Corte</option>
     </select>
 
-    <label>Preço:</label>
-    <input id="preco" readonly>
+    <label for="preco">Preço:</label>
+    <input id="preco" name="preco" readonly>
 
-    <button>Agendar</button>
+    <button type="submit">Agendar</button>
   </form>
 
   <!-- ADMIN -->
-  <button id="btnAdmin" style="display:none;">🔒 Área do Administrador</button>
+  <button id="btnAdmin" style="display:none;" aria-label="Área do Administrador">🔒 Área do Administrador</button>
 
   <div id="areaAdmin" style="display:none;">
     <h2>📋 Agenda Ativa</h2>
@@ -76,14 +74,17 @@
     <button id="btnLimparHistorico">🧹 Apagar histórico</button>
     
     <h2 class="controle-dias">📅 Controle de Dias</h2>
+   
+    <h3>📅 Dias bloqueados</h3>
+    <ul id="listaDiasBloqueados"></ul>
     
     <hr style="margin:20px 0">
 
+    <label for="dataBloqueio">Selecione a data para bloqueio:</label>
+    <input type="date" id="dataBloqueio">
 
-<input type="date" id="dataBloqueio">
-
-<button id="btnBloquearDia">🔒 Bloquear Dia</button>
-<button id="btnDesbloquearDia">🔓 Desbloquear Dia</button>
+    <button id="btnBloquearDia">🔒 Bloquear Dia</button>
+    <button id="btnDesbloquearDia">🔓 Desbloquear Dia</button>
 
     <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
     <button id="btnSairAdmin">❌ Sair</button>
