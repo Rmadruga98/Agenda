@@ -1,244 +1,231 @@
-body {
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #1a1a1a, #000);
+/* ===== RESET ===== */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Anton', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #111, #1c1c1c);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 95%;
+  max-width: 500px;
   padding: 20px;
 }
 
-/* Container */
-.container {
-  max-width: 500px;
-  margin: auto;
-  background: linear-gradient(180deg, #1c1c1c, #141414);
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  text-align: center;
-}
-
-/* Logo */
+/* ===== LOGO ===== */
 .logo-wrapper {
-  width: 200px;
-  height: 200px;
-  margin: auto;
-  border-radius: 50%;
-  background: #111;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .logo {
-  max-width: 85%;
+  width: 120px;
 }
 
-/* Títulos */
+/* ===== TÍTULOS ===== */
 h1 {
-  margin: 0 0 12px 0;
-  color: #f5f5f5;
-  font-size: clamp(18px, 4vw, 22px);
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
 }
-
 
 .barber-nome {
-  font-family: 'Anton', sans-serif;
-  color: #f5b400;
-  letter-spacing: 2px;
+  text-align: center;
+  font-size: 18px;
+  opacity: 0.8;
 }
 
 .barbeiro-nome {
-  color: #aaa;
-  font-size: 13px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.6;
+  margin-bottom: 20px;
 }
 
-/* Inputs */
-label {
-  color: #fff;
-  display: block;
-  text-align: left;
-  margin-top: 10px;
+/* ===== FORM ===== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, select, button {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
 }
 
 input, select {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #222;
-  color: #fff;
+  background: #2a2a2a;
+  color: white;
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: #1e90ff;
-}
-
-/* Botões */
 button {
-  width: 100%;
-  padding: 14px;
+  background: #d4af37;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.03);
+  background: #f1c40f;
+}
+
+#btnAdmin {
+  margin-top: 20px;
+}
+
+.btn-instalar {
+  display: block;
+  margin: 15px auto;
+}
+
+#btnRelatorioDiario,
+#btnSairAdmin {
   margin-top: 15px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #1e90ff, #0066ff);
-  color: #fff;
-  font-size: 16px;
+  width: 100%;
 }
 
-button:active {
-  transform: scale(.97);
-}
-
-/* Horários */
+/* ===== HORÁRIOS GRID ===== */
 .horarios {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
 }
 
 .hora-btn {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: bold;
+  background: #2a2a2a;
+  color: white;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.hora-btn:hover {
+  background: #444;
 }
 
 .hora-btn.ativa {
-  background: linear-gradient(135deg, #1e90ff, #0066ff);
-}
-
-/* Admin */
-.btn-admin {
-  background: linear-gradient(135deg, #f5b400, #c99700);
-  color: #000;
+  background: #d4af37;
+  color: black;
   font-weight: bold;
 }
 
-#listaAgendamentos li,
-#listaHistorico li {
-  background: #1a1a1a;
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-#listaAgendamentos button {
-  background: #d9534f;
-}
-
-.controle-dias {
-  color: #ffffff;
-}
-
-.dia-bloqueado {
-  opacity: 0.5;
-  text-align: center;
-  font-weight: bold;
+/* ===== ADMIN ===== */
+#areaAdmin {
   margin-top: 20px;
-  color: #aaa;
+  padding: 15px;
+  background: #222;
+  border-radius: 10px;
 }
 
-/* Rodapé */
-.rodape {
-  margin-top: 30px;
-  color: #777;
+ul {
+  list-style: none;
+  margin-top: 10px;
+}
+
+li {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
   font-size: 13px;
 }
-/* ===== CORREÇÃO TEXTO AGENDAMENTOS ===== */
 
-#listaAgendamentos li,
-#listaHistorico li {
-  color: #ffffff !important;
-}
-
-#listaAgendamentos li span,
-#listaHistorico li span,
-#listaAgendamentos li strong,
-#listaHistorico li strong {
-  color: #ffffff !important;
-}
-
-/* Nome do cliente */
-#listaAgendamentos li .nome,
-#listaHistorico li .nome {
-  color: #4fc3f7;
-  font-weight: bold;
-}
-
-/* Serviço */
-#listaAgendamentos li .servico,
-#listaHistorico li .servico {
-  color: #f5b400;
-}
-
-/* Preço */
-#listaAgendamentos li .preco,
-#listaHistorico li .preco {
-  color: #4caf50;
-  font-weight: bold;
-}
-#areaAdmin h2:nth-of-type(1) {
-  color: #f5b400; /* Agenda Ativa */
-}
-
-#areaAdmin h2:nth-of-type(2) {
-  color: #ff6b6b; /* Histórico */
-}
-/* ===== CONFIRMAÇÃO DE AGENDAMENTO ===== */
-.confirmacao {
+/* ===== MENSAGEM BONITA ===== */
+.toast {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease;
-}
-
-.confirmacao-box {
-  background: #1e1e1e;
-  border-radius: 20px;
-  padding: 30px 25px;
-  text-align: center;
-  box-shadow: 0 0 40px rgba(0,255,120,0.4);
-}
-
-.confirmacao-box .check {
-  font-size: 70px;
-  color: #2ecc71;
-  animation: pop 0.4s ease;
-}
-
-.confirmacao-box p {
-  margin-top: 12px;
-  font-size: 18px;
-  color: #fff;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #d4af37;
+  color: black;
+  padding: 12px 20px;
+  border-radius: 8px;
   font-weight: bold;
+  opacity: 0;
+  animation: fadeInOut 3s forwards;
 }
 
-@keyframes pop {
-  0% { transform: scale(0.4); }
-  80% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+@keyframes fadeInOut {
+  0% { opacity: 0; bottom: 10px; }
+  10% { opacity: 1; bottom: 20px; }
+  90% { opacity: 1; }
+  100% { opacity: 0; bottom: 10px; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.rodape {
+  text-align: center;
+  margin-top: 20px;
+  opacity: 0.5;
+  font-size: 12px;
 }
 
-#areaAdmin {
-  color: #ffffff;
+.financeiro-box {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
 }
 
-#areaAdmin h2,
-#areaAdmin h3,
-#areaAdmin p,
-#areaAdmin label,
-#areaAdmin li {
-  color: #ffffff;
+.financeiro-box p {
+  margin-bottom: 8px;
+}
+
+.dashboard-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.card h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.card p {
+  font-size: 20px;
+  font-weight: bold;
+  color: #d4af37;
+}
+
+#btnRelatorioDiario {
+  background: #28a745; /* verde */
+  color: white;
+}
+
+#btnRelatorioDiario:hover {
+  background: #218838;
+}
+
+#btnSairAdmin {
+  background: #444;
+  color: #ccc;
+}
+
+#btnSairAdmin:hover {
+  background: #666;
 }

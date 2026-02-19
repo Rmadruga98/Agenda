@@ -6,6 +6,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
+  const $ = id => document.getElementById(id);
+  const db = window.db;
+
+  /* ===== MENSAGEM BONITA (TOAST) ===== */
+  function mostrarMensagem(texto) {
+    const msg = document.createElement("div");
+    msg.className = "toast";
+    msg.textContent = texto;
+    document.body.appendChild(msg);
+
+    setTimeout(() => {
+      msg.remove();
+    }, 3000);
+  }
+
   /* ===== SERVIÇOS ===== */
   const servicos = {
     "Corte Simples": 30,
@@ -21,10 +36,20 @@ document.addEventListener("DOMContentLoaded", () => {
     "Platinado + Corte": 110
   };
 
-  const $ = id => document.getElementById(id);
-  const db = window.db;
+  /* ===== ELEMENTOS ===== */
+  const form = $("formAgendamento");
+  const dataInput = $("data");
+  const horaInput = $("hora");
+  const horariosDiv = $("horarios");
+  const precoInput = $("preco");
+  const servicoSelect = $("servico");
 
-  /* ===== DATA COM DIA DA SEMANA ===== */
+  /* ===== BLOQUEAR DATAS PASSADAS ===== */
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  dataInput.min = hoje.toISOString().split("T")[0];
+
+  /* ===== FORMATAR DATA ===== */
   function formatarDataComDia(dataISO) {
     const dias = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
     const [a,m,d] = dataISO.split("-").map(Number);
@@ -32,57 +57,53 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${dias[data.getDay()]} – ${data.toLocaleDateString("pt-BR")}`;
   }
 
-  /* ===== ELEMENTOS ===== */
-  const horariosDiv = $("horarios");
-  const horaInput = $("hora");
-  const dataInput = $("data");
-  const precoInput = $("preco");
-  const form = $("formAgendamento");
-
-  /* ===== BLOQUEAR DATAS PASSADAS ===== */
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-  dataInput.min = hoje.toISOString().split("T")[0];
-
-  /* ===== PREÇO ===== */
-  $("servico").addEventListener("change", e => {
-    precoInput.value = servicos[e.target.value] ? `R$ ${servicos[e.target.value]}` : "";
+  /* ===== PREÇO AUTOMÁTICO ===== */
+  servicoSelect.addEventListener("change", e => {
+    const valor = servicos[e.target.value];
+    precoInput.value = valor ? `R$ ${valor}` : "";
   });
 
-  /* ===== HORÁRIOS ===== */
+  /* ===== CARREGAR HORÁRIOS ===== */
   async function carregarHorarios(data) {
+
     horariosDiv.innerHTML = "";
     horaInput.value = "";
 
-    const hoje = new Date();
     const dataSelecionada = new Date(data + "T00:00");
+
+    if (dataSelecionada.getDay() === 0 || dataSelecionada.getDay() === 1) {
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>❌ Não atendemos domingo e segunda</p>";
+      return;
+    }
 
     const bloqueado = await db.collection("diasBloqueados").doc(data).get();
     if (bloqueado.exists) {
-      horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado pelo administrador</p>";
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado</p>";
       return;
     }
 
-    const dia = dataSelecionada.getDay();
-    if (dia === 0 || dia === 1) {
-      alert("Não atendemos domingo e segunda");
-      dataInput.value = "";
-      return;
-    }
+    const snap = await db.collection("agendamentos")
+      .where("data", "==", data)
+      .get();
 
-    const snap = await db.collection("agendamentos").where("data", "==", data).get();
     const ocupados = snap.docs.map(d => d.data().hora);
 
     for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
+
       if (h === 12) continue;
 
       const hora = String(h).padStart(2, "0") + ":00";
 
-      const dataHora = new Date(dataSelecionada.getFullYear(), dataSelecionada.getMonth(), dataSelecionada.getDate(), h, 15);
+      const dataHora = new Date(
+        dataSelecionada.getFullYear(),
+        dataSelecionada.getMonth(),
+        dataSelecionada.getDate(),
+        h
+      );
 
       if (
         dataSelecionada.toDateString() === hoje.toDateString() &&
-        hoje > dataHora
+        new Date() > dataHora
       ) continue;
 
       if (ocupados.includes(hora)) continue;
@@ -92,85 +113,83 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.className = "hora-btn";
       btn.textContent = hora;
 
-      btn.onclick = () => {
-        document.querySelectorAll(".hora-btn").forEach(b => b.classList.remove("ativa"));
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".hora-btn")
+          .forEach(b => b.classList.remove("ativa"));
+
         btn.classList.add("ativa");
         horaInput.value = hora;
-      };
+      });
 
       horariosDiv.appendChild(btn);
+    }
+
+    if (horariosDiv.innerHTML === "") {
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>Sem horários disponíveis</p>";
     }
   }
 
   dataInput.addEventListener("change", () => {
-    const selecionada = new Date(dataInput.value + "T00:00");
-    if (selecionada < hoje) {
-      alert("Não é possível agendar datas passadas.");
-      dataInput.value = "";
-      return;
-    }
     if (dataInput.value) carregarHorarios(dataInput.value);
   });
 
   /* ===== AGENDAR ===== */
   form.addEventListener("submit", async e => {
     e.preventDefault();
-    if (!horaInput.value) return alert("Selecione um horário");
 
     const nome = $("nome").value.trim();
     const telefone = $("telefone").value.trim();
-    const servicoValor = $("servico").value;
+    const servico = servicoSelect.value;
 
-    if (!nome || !telefone) {
-      return alert("Por favor, preencha todos os campos obrigatórios.");
+    if (!nome || !telefone || !dataInput.value || !horaInput.value || !servico) {
+      mostrarMensagem("Preencha todos os campos.");
+      return;
     }
 
     const ag = {
-      nome: nome,
-      telefone: telefone,
+      nome,
+      telefone,
       data: dataInput.value,
       hora: horaInput.value,
-      servico: servicoValor,
-      preco: servicos[servicoValor],
+      servico,
+      preco: servicos[servico],
       criadoEm: new Date()
     };
 
-    // Lógica para salvar o agendamento
     await db.collection("agendamentos").add(ag);
-    alert("Agendamento realizado com sucesso!\n\n⚠️ Cancelamentos avisar com no mínimo 1 hora de antecedência.");
 
-    // Redirecionar para o WhatsApp
+    mostrarMensagem("Agendamento realizado com sucesso!");
+
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-        `📌 NOVO AGENDAMENTO\n👤 ${ag.nome}\n📅 ${formatarDataComDia(dataInput.value)}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}
-       
-⚠️ *Observação:*
-Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA. `
-        
+        `📌 NOVO AGENDAMENTO\n👤 ${ag.nome}\n📅 ${formatarDataComDia(ag.data)}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}`
       )}`
     );
+
+    form.reset();
+    horariosDiv.innerHTML = "";
   });
 
   /* ===== ADMIN ===== */
   const btnAdmin = $("btnAdmin");
   const areaAdmin = $("areaAdmin");
   const btnSairAdmin = $("btnSairAdmin");
-  const listaAg = $("listaAgendamentos");
-  const listaHist = $("listaHistorico");
-  const btnRel = $("btnRelatorioDiario");
-  const listaDiasBloqueados = $("listaDiasBloqueados");
 
   let taps = 0;
+
   document.querySelector("h1").addEventListener("click", () => {
-    if (++taps === 5) {
+    taps++;
+    if (taps === 5) {
       btnAdmin.style.display = "block";
-      alert("🔓 Modo administrador liberado");
+      mostrarMensagem("Modo administrador liberado");
+      taps = 0;
     }
   });
 
-  btnAdmin.addEventListener("click", async () => {
-    if (prompt("Digite a senha do administrador:") !== SENHA_ADMIN) {
-      alert("Senha incorreta");
+  btnAdmin.addEventListener("click", () => {
+    const senha = prompt("Digite a senha:");
+    if (senha !== SENHA_ADMIN) {
+      mostrarMensagem("Senha incorreta");
       return;
     }
 
@@ -186,191 +205,196 @@ Cancelamentos avisar com no mínimo 1hra de ANTECEDÊNCIA. `
     btnAdmin.style.display = "block";
   });
 
+  /* ===== BLOQUEAR DIA ===== */
+  const btnBloquearDia = $("btnBloquearDia");
+  const dataBloqueio = $("dataBloqueio");
+
+  btnBloquearDia.addEventListener("click", async () => {
+
+    if (!dataBloqueio.value) {
+      mostrarMensagem("Selecione uma data");
+      return;
+    }
+
+    await db.collection("diasBloqueados")
+      .doc(dataBloqueio.value)
+      .set({ criadoEm: new Date() });
+
+    mostrarMensagem("Dia bloqueado!");
+    dataBloqueio.value = "";
+    carregarDiasBloqueados();
+  });
+
   /* ===== LISTAR DIAS BLOQUEADOS ===== */
   async function carregarDiasBloqueados() {
-    if (!listaDiasBloqueados) return;
 
-    listaDiasBloqueados.innerHTML = "";
+    const lista = $("listaDiasBloqueados");
+    lista.innerHTML = "";
 
     const snapshot = await db.collection("diasBloqueados").get();
 
     if (snapshot.empty) {
-      listaDiasBloqueados.innerHTML = "<li>Nenhum dia bloqueado</li>";
+      lista.innerHTML = "<li>Nenhum dia bloqueado</li>";
       return;
     }
 
     snapshot.forEach(doc => {
-      const data = doc.id;
 
       const li = document.createElement("li");
       li.innerHTML = `
-        📅 ${formatarDataComDia(data)}
+        📅 ${formatarDataComDia(doc.id)}
         <button class="btn-desbloquear">Desbloquear</button>
       `;
 
-      li.querySelector(".btn-desbloquear").onclick = async () => {
-        await db.collection("diasBloqueados").doc(data).delete();
+      li.querySelector("button").addEventListener("click", async () => {
+        await db.collection("diasBloqueados").doc(doc.id).delete();
         carregarDiasBloqueados();
-      };
+      });
 
-      listaDiasBloqueados.appendChild(li);
+      lista.appendChild(li);
     });
   }
 
-  async function carregarAdmin() {
-    listaAg.innerHTML = "";
-    listaHist.innerHTML = "";
+  /* ===== ADMIN LISTAGEM ===== */
+ async function carregarAdmin() {
 
-    const agora = new Date();
-    agora.setSeconds(0, 0);
+  const listaAg = $("listaAgendamentos");
+  const listaHist = $("listaHistorico");
+
+  const qtdHojeEl = $("qtdHoje");
+  const faturamentoHojeEl = $("faturamentoHoje");
+  const proximoClienteEl = $("proximoCliente");
+
+
+  listaAg.innerHTML = "";
+  listaHist.innerHTML = "";
+
+  let totalDia = 0;
+  let totalMes = 0;
+  let qtdHoje = 0;
+  let proximoCliente = null;
+
+  const snapshot = await db.collection("agendamentos").get();
+  const agora = new Date();
+
+  const hojeStr = agora.toISOString().split("T")[0];
+  const mesAtual = agora.getMonth();
+  const anoAtual = agora.getFullYear();
+
+  snapshot.forEach(doc => {
+
+    const a = doc.data();
+
+    const [A, M, D] = a.data.split("-").map(Number);
+    const [H, Mi] = a.hora.split(":").map(Number);
+
+    const dataHora = new Date(A, M - 1, D, H, Mi);
+
+    // ===== CALCULOS =====
+    if (a.data === hojeStr) {
+      totalDia += Number(a.preco);
+      qtdHoje++;
+
+      if (dataHora > agora) {
+        if (!proximoCliente || dataHora < proximoCliente.dataHora) {
+          proximoCliente = {
+            nome: a.nome,
+            hora: a.hora,
+            dataHora
+          };
+        }
+      }
+    }
+
+    if ((M - 1) === mesAtual && A === anoAtual) {
+      totalMes += Number(a.preco);
+    }
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      📅 ${formatarDataComDia(a.data)}<br>
+      ⏰ ${a.hora}<br>
+      👤 ${a.nome}<br>
+      ✂️ ${a.servico} — R$ ${a.preco}
+    `;
+
+    if (dataHora >= agora) {
+
+      const btn = document.createElement("button");
+      btn.textContent = "❌ Remover";
+
+      btn.addEventListener("click", async () => {
+        if (!confirm("Remover agendamento?")) return;
+        await db.collection("agendamentos").doc(doc.id).delete();
+        carregarAdmin();
+      });
+
+      li.appendChild(btn);
+      listaAg.appendChild(li);
+
+    } else {
+      li.style.opacity = "0.6";
+      listaHist.appendChild(li);
+    }
+
+  });
+
+  // Atualizar dashboard
+  qtdHojeEl.textContent = qtdHoje;
+  faturamentoHojeEl.textContent = `R$ ${totalDia}`;
+
+  if (proximoCliente) {
+    proximoClienteEl.textContent = `${proximoCliente.nome} às ${proximoCliente.hora}`;
+  } else {
+    proximoClienteEl.textContent = "Nenhum";
+  }
+
+}
+
+/* ===== RELATÓRIO DO DIA ===== */
+
+const btnRelatorio = $("btnRelatorioDiario");
+
+if (btnRelatorio) {
+
+  btnRelatorio.addEventListener("click", async () => {
 
     const snapshot = await db.collection("agendamentos").get();
+    const hoje = new Date().toISOString().split("T")[0];
 
-    if (snapshot.empty) {
-      listaAg.innerHTML = "<li>Nenhum agendamento encontrado</li>";
-      return;
-    }
+    let mensagem = `📊 *RELATÓRIO DO DIA*\n\n`;
+    let total = 0;
+    let contador = 0;
 
     snapshot.forEach(doc => {
       const a = doc.data();
 
-      const [A, M, D] = a.data.split("-").map(Number);
-      const [H, Mi] = a.hora.split(":").map(Number);
-      const dataHora = new Date(A, M - 1, D, H, Mi);
+      if (a.data === hoje) {
+        contador++;
+        total += Number(a.preco);
 
-      const li = document.createElement("li");
-      li.innerHTML = `
-        📅 ${a.data} ⏰ ${a.hora}<br>
-        👤 ${a.nome}<br>
-        ✂️ ${a.servico} — R$ ${a.preco}
-      `;
-
-      if (dataHora >= agora) {
-        const btn = document.createElement("button");
-        btn.textContent = "❌ Remover";
-
-        btn.onclick = async () => {
-          if (!confirm("Remover este agendamento?")) return;
-          await db.collection("agendamentos").doc(doc.id).delete();
-          carregarAdmin();
-          alert("Agendamento removido com sucesso!");
-        };
-
-        li.appendChild(btn);
-        listaAg.appendChild(li);
-      } else {
-        li.style.opacity = "0.6";
-        listaHist.appendChild(li);
-      }
-    });
-  }
-  /* ===== BLOQUEAR / DESBLOQUEAR DIA ===== */
-const dataBloqueioInput = $("dataBloqueio");
-const btnBloquearDia = $("btnBloquearDia");
-
-if (btnBloquearDia) {
-  btnBloquearDia.addEventListener("click", async () => {
-    const data = dataBloqueioInput.value;
-    if (!data) return alert("Selecione uma data");
-
-    await db.collection("diasBloqueados").doc(data).set({
-      bloqueado: true,
-      criadoEm: new Date()
-    });
-
-    alert("Dia bloqueado com sucesso!");
-    dataBloqueioInput.value = "";
-    carregarDiasBloqueados();
-  });
-}
-
-/* ===== APAGAR HISTÓRICO ===== */
-const btnLimparHistorico = $("btnLimparHistorico");
-
-if (btnLimparHistorico) {
-  btnLimparHistorico.addEventListener("click", async () => {
-
-    if (!confirm("Tem certeza que deseja apagar todo o histórico?")) return;
-
-    const agora = new Date();
-    agora.setSeconds(0, 0);
-
-    const snapshot = await db.collection("agendamentos").get();
-
-    if (snapshot.empty) {
-      alert("Nenhum histórico para apagar.");
-      return;
-    }
-
-    const batch = db.batch();
-    let apagou = false;
-
-    snapshot.forEach(doc => {
-      const a = doc.data();
-
-      const [A, M, D] = a.data.split("-").map(Number);
-      const [H, Mi] = a.hora.split(":").map(Number);
-      const dataHora = new Date(A, M - 1, D, H, Mi);
-
-      if (dataHora < agora) {
-        batch.delete(doc.ref);
-        apagou = true;
+        mensagem += `👤 ${a.nome}\n`;
+        mensagem += `⏰ ${a.hora}\n`;
+        mensagem += `✂️ ${a.servico}\n`;
+        mensagem += `💰 R$ ${a.preco}\n\n`;
       }
     });
 
-    if (!apagou) {
-      alert("Nenhum histórico para apagar.");
+    if (contador === 0) {
+      mostrarMensagem("Nenhum agendamento hoje.");
       return;
     }
 
-    await batch.commit();
+    mensagem += `——————————————\n`;
+    mensagem += `📅 Total de Clientes: ${contador}\n`;
+    mensagem += `💰 Total Faturado: R$ ${total}\n`;
 
-    alert("Histórico apagado com sucesso!");
-    carregarAdmin();
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`
+    );
+
   });
+
 }
 
-/* ===== PWA – INSTALAR APP ===== */
-let deferredPrompt = null;
-const btnInstalar = $("btnInstalar");
-
-// Esconde inicialmente
-if (btnInstalar) {
-  btnInstalar.style.display = "none";
-
-  // Evento que libera instalação
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Só mostra se não estiver instalado
-    if (!window.matchMedia('(display-mode: standalone)').matches) {
-      btnInstalar.style.display = "block";
-    }
-  });
-
-  // Clique no botão
-  btnInstalar.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-
-    if (choice.outcome === "accepted") {
-      btnInstalar.style.display = "none";
-    }
-
-    deferredPrompt = null;
-  });
-
-  // Se já estiver instalado
-  window.addEventListener("appinstalled", () => {
-    btnInstalar.style.display = "none";
-  });
-
-  // Se abrir já instalado (modo app)
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    btnInstalar.style.display = "none";
-  }
-}
 });
