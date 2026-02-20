@@ -281,6 +281,57 @@ if (btnConsultar) {
   };
 
 }
+/* ===== LISTAR DIAS BLOQUEADOS ===== */
+async function carregarDiasBloqueados() {
+
+  const lista = $("listaDiasBloqueados");
+  if (!lista) return;
+
+  lista.innerHTML = "";
+
+  const snapshot = await db.collection("diasBloqueados").get();
+
+  if (snapshot.empty) {
+    lista.innerHTML = "<li>Nenhum dia bloqueado</li>";
+    return;
+  }
+
+  snapshot.forEach(doc => {
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      📅 ${doc.id}
+      <button class="btn-desbloquear">Desbloquear</button>
+    `;
+
+    li.querySelector("button").addEventListener("click", async () => {
+
+      const user = firebase.auth().currentUser;
+
+      if (!user) {
+        mostrarMensagem("Você precisa estar logado como administrador.");
+        return;
+      }
+
+      try {
+
+        await db.collection("diasBloqueados").doc(doc.id).delete();
+        mostrarMensagem("Dia desbloqueado com sucesso!");
+        carregarDiasBloqueados();
+
+      } catch (error) {
+
+        mostrarMensagem("Erro ao desbloquear o dia.");
+
+      }
+
+    });
+
+    lista.appendChild(li);
+
+  });
+
+}
 
 /* ================= ADMIN COM LOGIN FIREBASE ================= */
 
