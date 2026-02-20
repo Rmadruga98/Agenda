@@ -40,13 +40,14 @@ h1 {
 
 .barber-nome {
   text-align: center;
-  font-size: 18px;
+  font-size: 30px;
+  color: #d4af37;
   opacity: 0.8;
 }
 
 .barbeiro-nome {
   text-align: center;
-  font-size: 14px;
+  font-size: 18px;
   opacity: 0.6;
   margin-bottom: 20px;
 }
@@ -228,4 +229,54 @@ li {
 
 #btnSairAdmin:hover {
   background: #666;
+}
+
+.dia-bloqueado {
+  background: linear-gradient(135deg, #8b0000, #b30000);
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+
+  width: 80%;
+  max-width: 260px;
+
+  margin: 15px auto; /* CENTRALIZA O BLOCO */
+
+  animation: pulse 1.5s infinite;
+}
+
+.horarios .dia-bloqueado {
+  grid-column: 1 / -1; /* ocupa todas as colunas do grid */
+  justify-self: center; /* centraliza horizontalmente dentro do grid */
+}
+@keyframes pulse {
+  0% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+  }
+  50% { 
+    transform: scale(1.08);
+    box-shadow: 0 0 20px 8px rgba(255, 0, 0, 0.6);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+
+#areaMeusAgendamentos {
+  margin-top: 15px;
+  background: #222;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+#listaMeusAgendamentos li {
+  background: #2a2a2a;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
 }

@@ -437,4 +437,71 @@ if (btnInstalar) {
   }
 }
 
+/* ===== MEUS AGENDAMENTOS ===== */
+
+const btnMeus = $("btnMeusAgendamentos");
+const areaMeus = $("areaMeusAgendamentos");
+const btnConsultar = $("btnConsultarAgendamentos");
+const listaMeus = $("listaMeusAgendamentos");
+
+if (btnMeus) {
+
+  btnMeus.addEventListener("click", () => {
+    areaMeus.style.display = 
+      areaMeus.style.display === "none" ? "block" : "none";
+  });
+
+}
+
+if (btnConsultar) {
+
+  btnConsultar.addEventListener("click", async () => {
+
+    const telefone = $("telefoneConsulta").value.trim();
+
+    if (!telefone) {
+      mostrarMensagem("Digite seu WhatsApp");
+      return;
+    }
+
+    listaMeus.innerHTML = "";
+
+    const snapshot = await db.collection("agendamentos")
+      .where("telefone", "==", telefone)
+      .get();
+
+    const agora = new Date();
+    let encontrou = false;
+
+    snapshot.forEach(doc => {
+
+      const a = doc.data();
+
+      const [A, M, D] = a.data.split("-").map(Number);
+      const [H, Mi] = a.hora.split(":").map(Number);
+      const dataHora = new Date(A, M - 1, D, H, Mi);
+
+      if (dataHora >= agora) {
+
+        encontrou = true;
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          📅 ${formatarDataComDia(a.data)}<br>
+          ⏰ ${a.hora}<br>
+          ✂️ ${a.servico}
+        `;
+
+        listaMeus.appendChild(li);
+      }
+
+    });
+
+    if (!encontrou) {
+      listaMeus.innerHTML = "<li>Nenhum agendamento futuro encontrado.</li>";
+    }
+
+  });
+
+}
 });

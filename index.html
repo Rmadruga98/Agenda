@@ -25,7 +25,7 @@
     <img src="logo.png" alt="Logo da Barbearia Madruga" class="logo">
   </div>
 
-  <h1>Agendamento Online 💈</h1>
+  <h1> Agendamento Online 💈</h1>
 
   <!-- BOTÃO INSTALAR -->
   <button id="btnInstalar" class="btn-instalar" aria-label="Instalar aplicativo">
@@ -90,6 +90,17 @@
     <input id="preco" name="preco" readonly>
 
     <button type="submit">Agendar</button>
+
+<button type="button" id="btnMeusAgendamentos">
+  📋 Ver meus agendamentos
+</button>
+
+<div id="areaMeusAgendamentos" style="display:none;">
+  <input type="tel" id="telefoneConsulta" placeholder="Digite seu WhatsApp">
+  <button type="button" id="btnConsultarAgendamentos">Consultar</button>
+
+  <ul id="listaMeusAgendamentos"></ul>
+</div>
 
   </form>
 
