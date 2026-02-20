@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== CONFIG ===== */
   const WHATSAPP = "5535998066403";
-  const SENHA_ADMIN = "madruga123";
   const HORA_ABERTURA = 8;
   const HORA_FECHAMENTO = 19;
 
@@ -161,7 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 🔐 Código para cancelamento: ${codigoCancelamento}
 
-⚠️ Guarde esse código caso precise cancelar.`
+⚠️ Guarde esse código caso precise cancelar.
+Cancelamento com 1hora de antecedência.`
       )}`
     );
 
@@ -169,73 +169,79 @@ document.addEventListener("DOMContentLoaded", () => {
     horariosDiv.innerHTML="";
   });
 
-  /* ===== MEUS AGENDAMENTOS ===== */
+/* ===== MEUS AGENDAMENTOS ===== */
 
-  const btnMeus = $("btnMeusAgendamentos");
-  const areaMeus = $("areaMeusAgendamentos");
-  const btnConsultar = $("btnConsultarAgendamentos");
-  const listaMeus = $("listaMeusAgendamentos");
+const btnMeus = $("btnMeusAgendamentos");
+const areaMeus = $("areaMeusAgendamentos");
+const btnConsultar = $("btnConsultarAgendamentos");
+const listaMeus = $("listaMeusAgendamentos");
 
-  if(btnMeus){
-    btnMeus.onclick = ()=>{
-      areaMeus.style.display =
-        areaMeus.style.display==="none"?"block":"none";
-    };
-  }
+if (btnMeus) {
+  btnMeus.onclick = () => {
+    areaMeus.style.display =
+      areaMeus.style.display === "none" ? "block" : "none";
+  };
+}
 
-  if(btnConsultar){
+if (btnConsultar) {
 
-    btnConsultar.onclick = async ()=>{
+  btnConsultar.onclick = async () => {
 
-      const telefone = $("telefoneConsulta").value.trim();
-      const codigoDigitado = $("codigoConsulta").value.trim();
+    const telefone = $("telefoneConsulta").value.trim();
+    const codigoDigitado = $("codigoConsulta").value.trim();
 
-      if(!telefone || !codigoDigitado){
-        mostrarMensagem("Digite telefone e código.");
-        return;
-      }
+    if (!telefone || !codigoDigitado) {
+      mostrarMensagem("Digite telefone e código.");
+      return;
+    }
 
-      listaMeus.innerHTML="";
+    listaMeus.innerHTML = "";
 
-      const snapshot = await db.collection("agendamentos")
-        .where("telefone","==",telefone)
-        .get();
+    const snapshot = await db.collection("agendamentos")
+      .where("telefone", "==", telefone)
+      .get();
 
-      const agora = new Date();
-      let encontrou=false;
+    const agora = new Date();
+    let encontrou = false;
 
-      snapshot.forEach(doc=>{
+    snapshot.forEach(doc => {
 
-        const a = doc.data();
+      const a = doc.data();
 
-        const [A,M,D]=a.data.split("-").map(Number);
-        const [H,Mi]=a.hora.split(":").map(Number);
-        const dataHora = new Date(A,M-1,D,H,Mi);
+      const [A, M, D] = a.data.split("-").map(Number);
+      const [H, Mi] = a.hora.split(":").map(Number);
+      const dataHora = new Date(A, M - 1, D, H, Mi);
 
-        if(dataHora>=agora && Number(codigoDigitado)===Number(a.codigoCancelamento)){
+      // 🔒 Validação forte
+      if (
+        dataHora >= agora &&
+        Number(a.codigoCancelamento) === Number(codigoDigitado)
+      ) {
 
-          encontrou=true;
+        encontrou = true;
 
-          const li = document.createElement("li");
-          li.innerHTML=`
-            📅 ${formatarDataComDia(a.data)}<br>
-            ⏰ ${a.hora}<br>
-            ✂️ ${a.servico}<br>
-          `;
+        const li = document.createElement("li");
+        li.innerHTML = `
+          📅 ${formatarDataComDia(a.data)}<br>
+          ⏰ ${a.hora}<br>
+          ✂️ ${a.servico}<br>
+        `;
 
-          const btnCancelar=document.createElement("button");
-          btnCancelar.textContent="❌ Cancelar";
-          btnCancelar.style.marginTop="8px";
-          btnCancelar.style.background="#c0392b";
-          btnCancelar.style.color="white";
+        const btnCancelar = document.createElement("button");
+        btnCancelar.textContent = "❌ Cancelar";
+        btnCancelar.style.marginTop = "8px";
+        btnCancelar.style.background = "#c0392b";
+        btnCancelar.style.color = "white";
 
-          btnCancelar.onclick=async()=>{
+        btnCancelar.onclick = async () => {
 
-            if(!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+          if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+
+          try {
 
             await db.collection("agendamentos").doc(doc.id).delete();
 
-            const mensagem=`
+            const mensagem = `
 ❌ CANCELAMENTO DE AGENDAMENTO
 
 👤 ${a.nome}
@@ -252,20 +258,93 @@ document.addEventListener("DOMContentLoaded", () => {
             mostrarMensagem("Agendamento cancelado com sucesso!");
 
             li.remove();
-          };
 
-          li.appendChild(btnCancelar);
-          listaMeus.appendChild(li);
-        }
+          } catch (error) {
 
-      });
+            mostrarMensagem("Erro ao cancelar agendamento.");
 
-      if(!encontrou){
-        listaMeus.innerHTML="<li>Nenhum agendamento encontrado ou código incorreto.</li>";
+          }
+
+        };
+
+        li.appendChild(btnCancelar);
+        listaMeus.appendChild(li);
       }
 
-    };
+    });
+
+    if (!encontrou) {
+      listaMeus.innerHTML =
+        "<li>Nenhum agendamento encontrado ou código incorreto.</li>";
+    }
+
+  };
+
+}
+
+/* ================= ADMIN COM LOGIN FIREBASE ================= */
+
+const auth = firebase.auth();
+
+const btnAdmin = $("btnAdmin");
+const areaLoginAdmin = $("areaLoginAdmin");
+const areaAdmin = $("areaAdmin");
+const btnLoginAdmin = $("btnLoginAdmin");
+const btnSairAdmin = $("btnSairAdmin");
+
+let taps = 0;
+
+// Liberar botão admin ao clicar 5x no título
+document.querySelector("h1").addEventListener("click", () => {
+  taps++;
+  if (taps === 5) {
+    btnAdmin.style.display = "block";
+    mostrarMensagem("Modo administrador liberado");
+    taps = 0;
+  }
+});
+
+// Abrir tela de login
+btnAdmin.addEventListener("click", () => {
+  areaLoginAdmin.style.display = "block";
+  btnAdmin.style.display = "none";
+});
+
+// Fazer login
+btnLoginAdmin.addEventListener("click", async () => {
+
+  const email = $("emailAdmin").value.trim();
+  const senha = $("senhaAdmin").value.trim();
+
+  if (!email || !senha) {
+    mostrarMensagem("Preencha email e senha");
+    return;
+  }
+
+  try {
+
+    await auth.signInWithEmailAndPassword(email, senha);
+
+    mostrarMensagem("Login realizado com sucesso");
+
+    areaLoginAdmin.style.display = "none";
+    areaAdmin.style.display = "block";
+
+    carregarAdmin();
+    carregarDiasBloqueados();
+
+  } catch (error) {
+
+    mostrarMensagem("Email ou senha incorretos");
 
   }
 
+});
+
+// Sair do admin
+btnSairAdmin.addEventListener("click", async () => {
+  await auth.signOut();
+  areaAdmin.style.display = "none";
+  btnAdmin.style.display = "block";
+});
 });
