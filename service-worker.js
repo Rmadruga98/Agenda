@@ -1,4 +1,4 @@
-const CACHE_NAME = "agenda-madruga-v4";
+const CACHE_NAME = "agenda-madruga-v5";
 
 const FILES_TO_CACHE = [
   "./",

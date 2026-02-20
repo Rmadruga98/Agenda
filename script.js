@@ -415,4 +415,53 @@ if (btnConsultar) {
     btnAdmin.style.display = "block";
   });
 
+/* ===== PWA – INSTALAR APP ===== */
+
+let deferredPrompt = null;
+const btnInstalar = $("btnInstalar");
+
+if (btnInstalar) {
+
+  // Esconde por padrão
+  btnInstalar.style.display = "none";
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Só mostra se NÃO estiver instalado
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+      btnInstalar.style.display = "block";
+    }
+  });
+
+  btnInstalar.addEventListener("click", async () => {
+
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      btnInstalar.style.display = "none";
+    }
+
+    deferredPrompt = null;
+
+  });
+
+  // Quando instalar, esconder botão
+  window.addEventListener("appinstalled", () => {
+    btnInstalar.style.display = "none";
+  });
+
+  // 🔥 ESSA LINHA É A MAIS IMPORTANTE
+  if (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  ) {
+    btnInstalar.style.display = "none";
+  }
+
+}
 });
