@@ -171,6 +171,114 @@ Cancelamento com 1 hora de antecedência.`
     horariosDiv.innerHTML="";
   });
 
+/* ===== MEUS AGENDAMENTOS ===== */
+
+const btnMeus = $("btnMeusAgendamentos");
+const areaMeus = $("areaMeusAgendamentos");
+const btnConsultar = $("btnConsultarAgendamentos");
+const listaMeus = $("listaMeusAgendamentos");
+
+if (btnMeus) {
+  btnMeus.onclick = () => {
+    areaMeus.style.display =
+      areaMeus.style.display === "none" ? "block" : "none";
+  };
+}
+
+if (btnConsultar) {
+
+  btnConsultar.onclick = async () => {
+
+    const telefone = $("telefoneConsulta").value.trim();
+    const codigoDigitado = $("codigoConsulta").value.trim();
+
+    if (!telefone || !codigoDigitado) {
+      mostrarMensagem("Digite telefone e código.");
+      return;
+    }
+
+    listaMeus.innerHTML = "";
+
+    const snapshot = await db.collection("agendamentos")
+      .where("telefone", "==", telefone)
+      .get();
+
+    const agora = new Date();
+    let encontrou = false;
+
+    snapshot.forEach(doc => {
+
+      const a = doc.data();
+
+      const [A, M, D] = a.data.split("-").map(Number);
+      const [H, Mi] = a.hora.split(":").map(Number);
+      const dataHora = new Date(A, M - 1, D, H, Mi);
+
+      if (
+        dataHora >= agora &&
+        Number(a.codigoCancelamento) === Number(codigoDigitado)
+      ) {
+
+        encontrou = true;
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          📅 ${formatarDataComDia(a.data)}<br>
+          ⏰ ${a.hora}<br>
+          ✂️ ${a.servico}<br>
+        `;
+
+        const btnCancelar = document.createElement("button");
+        btnCancelar.textContent = "❌ Cancelar";
+        btnCancelar.style.marginTop = "8px";
+        btnCancelar.style.background = "#c0392b";
+        btnCancelar.style.color = "white";
+
+        btnCancelar.onclick = async () => {
+
+          if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+
+          try {
+
+            await db.collection("agendamentos").doc(doc.id).delete();
+
+            const mensagem = `
+❌ CANCELAMENTO DE AGENDAMENTO
+
+👤 ${a.nome}
+📅 ${formatarDataComDia(a.data)}
+⏰ ${a.hora}
+✂️ ${a.servico}
+📱 ${a.telefone}
+`;
+
+            window.open(
+              `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`
+            );
+
+            mostrarMensagem("Agendamento cancelado com sucesso!");
+            li.remove();
+
+          } catch (error) {
+            mostrarMensagem("Erro ao cancelar agendamento.");
+          }
+
+        };
+
+        li.appendChild(btnCancelar);
+        listaMeus.appendChild(li);
+      }
+
+    });
+
+    if (!encontrou) {
+      listaMeus.innerHTML =
+        "<li>Nenhum agendamento encontrado ou código incorreto.</li>";
+    }
+
+  };
+
+}
   /* ===== BLOQUEAR DIA ===== */
   const btnBloquearDia = $("btnBloquearDia");
   const dataBloqueio = $("dataBloqueio");
