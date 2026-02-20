@@ -7,6 +7,12 @@
 }
 
 body {
+  background: #111;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
   background: linear-gradient(135deg, #111, #1c1c1c);
   color: #fff;
   min-height: 100vh;

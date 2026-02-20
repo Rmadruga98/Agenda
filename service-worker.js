@@ -1,10 +1,11 @@
-const CACHE_NAME = "agenda-madruga-v9";
+const CACHE_NAME = "agenda-madruga-v10";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
+  "./firebase.js",
   "./manifest.json",
   "./logo.png"
 ];

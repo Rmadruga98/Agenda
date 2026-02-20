@@ -91,10 +91,10 @@ async function carregarHorarios(data) {
     horaFechamentoDia = 21;
   }
   
-  // Quinta (4) e Sexta (5) até 18h)
+  // Quinta (4) e Sexta (5) até 17h)
 if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 18;}
 
-  // Sábado (6) até 16h
+  // Sábado (6) até as 16h
   if (diaSemana === 6) {
     horaFechamentoDia = 17;
   }
@@ -170,7 +170,7 @@ if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 18;}
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-`📌 NOVO AGENDAMENTO CONFIMADO✅
+`📌 NOVO AGENDAMENTO CONFIRMADO✅
 
 👤 ${ag.nome}
 📅 ${formatarDataComDia(ag.data)}
