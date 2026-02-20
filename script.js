@@ -91,8 +91,8 @@ async function carregarHorarios(data) {
     horaFechamentoDia = 21;
   }
   
-  // Quinta (4) e Quinta (5) até 18h)
-if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 19;}
+  // Quinta (4) e Sexta (5) até 18h)
+if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 18;}
 
   // Sábado (6) até 16h
   if (diaSemana === 6) {
