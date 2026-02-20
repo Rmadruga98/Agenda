@@ -133,6 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const codigoCancelamento = Math.floor(1000 + Math.random() * 9000);
+
     const ag = {
       nome,
       telefone,
@@ -140,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hora:horaInput.value,
       servico,
       preco:servicos[servico],
+      codigoCancelamento,
       criadoEm:new Date()
     };
 
@@ -149,7 +152,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-        `📌 NOVO AGENDAMENTO\n👤 ${ag.nome}\n📅 ${formatarDataComDia(ag.data)}\n⏰ ${ag.hora}\n✂️ ${ag.servico}\n💰 R$ ${ag.preco}`
+        `📌 NOVO AGENDAMENTO\n
+👤 ${ag.nome}
+📅 ${formatarDataComDia(ag.data)}
+⏰ ${ag.hora}
+✂️ ${ag.servico}
+💰 R$ ${ag.preco}
+
+🔐 Código para cancelamento: ${codigoCancelamento}
+
+⚠️ Guarde esse código caso precise cancelar.`
       )}`
     );
 
@@ -176,9 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {
     btnConsultar.onclick = async ()=>{
 
       const telefone = $("telefoneConsulta").value.trim();
+      const codigoDigitado = $("codigoConsulta").value.trim();
 
-      if(!telefone){
-        mostrarMensagem("Digite seu WhatsApp");
+      if(!telefone || !codigoDigitado){
+        mostrarMensagem("Digite telefone e código.");
         return;
       }
 
@@ -199,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const [H,Mi]=a.hora.split(":").map(Number);
         const dataHora = new Date(A,M-1,D,H,Mi);
 
-        if(dataHora>=agora){
+        if(dataHora>=agora && Number(codigoDigitado)===Number(a.codigoCancelamento)){
 
           encontrou=true;
 
@@ -248,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if(!encontrou){
-        listaMeus.innerHTML="<li>Nenhum agendamento futuro encontrado.</li>";
+        listaMeus.innerHTML="<li>Nenhum agendamento encontrado ou código incorreto.</li>";
       }
 
     };
