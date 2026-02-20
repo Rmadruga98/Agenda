@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===== CONFIG ===== */
   const WHATSAPP = "5535998066403";
   const HORA_ABERTURA = 8;
-  const HORA_FECHAMENTO = 19;
+  const HORA_FECHAMENTO = 20;
 
   const $ = id => document.getElementById(id);
   const db = window.db;
@@ -56,65 +56,83 @@ document.addEventListener("DOMContentLoaded", () => {
     precoInput.value = valor ? `R$ ${valor}` : "";
   });
 
-  /* ===== HORÁRIOS ===== */
-  async function carregarHorarios(data) {
+ /*===== HORÁRIOS ===== */
+async function carregarHorarios(data) {
 
-    horariosDiv.innerHTML = "";
-    horaInput.value = "";
+  horariosDiv.innerHTML = "";
+  horaInput.value = "";
 
-    const dataSelecionada = new Date(data + "T00:00");
+  const dataSelecionada = new Date(data + "T00:00");
 
-    if (dataSelecionada.getDay() === 0 || dataSelecionada.getDay() === 1) {
-      horariosDiv.innerHTML = "<p class='dia-bloqueado'>❌ Não atendemos domingo e segunda</p>";
-      return;
-    }
-
-    const bloqueado = await db.collection("diasBloqueados").doc(data).get();
-    if (bloqueado.exists) {
-      horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado</p>";
-      return;
-    }
-
-    const snap = await db.collection("agendamentos")
-      .where("data", "==", data)
-      .get();
-
-    const ocupados = snap.docs.map(d => d.data().hora);
-
-    for (let h = HORA_ABERTURA; h < HORA_FECHAMENTO; h++) {
-
-      if (h === 12) continue;
-
-      const hora = String(h).padStart(2,"0")+":00";
-
-      const dataHora = new Date(
-        dataSelecionada.getFullYear(),
-        dataSelecionada.getMonth(),
-        dataSelecionada.getDate(),
-        h
-      );
-
-      if (
-        dataSelecionada.toDateString() === hoje.toDateString() &&
-        new Date() > dataHora
-      ) continue;
-
-      if (ocupados.includes(hora)) continue;
-
-      const btn = document.createElement("button");
-      btn.type="button";
-      btn.className="hora-btn";
-      btn.textContent=hora;
-
-      btn.onclick = () => {
-        document.querySelectorAll(".hora-btn").forEach(b=>b.classList.remove("ativa"));
-        btn.classList.add("ativa");
-        horaInput.value = hora;
-      };
-
-      horariosDiv.appendChild(btn);
-    }
+  // ❌ Não atende domingo (0) e segunda (1)
+  if (dataSelecionada.getDay() === 0 || dataSelecionada.getDay() === 1) {
+    horariosDiv.innerHTML = "<p class='dia-bloqueado'>❌ Não atendemos domingo e segunda</p>";
+    return;
   }
+
+  const bloqueado = await db.collection("diasBloqueados").doc(data).get();
+  if (bloqueado.exists) {
+    horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado</p>";
+    return;
+  }
+
+  const snap = await db.collection("agendamentos")
+    .where("data", "==", data)
+    .get();
+
+  const ocupados = snap.docs.map(d => d.data().hora);
+
+  // 🔥 Definir horário de fechamento por dia
+  let horaFechamentoDia = HORA_FECHAMENTO;
+  const diaSemana = dataSelecionada.getDay();
+
+  // Terça (2) e Quarta (3) até 20h
+  if (diaSemana === 2 || diaSemana === 3) {
+    horaFechamentoDia = 21;
+  }
+  
+  // Quinta (4) e Quinta (5) até 18h)
+if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 19;}
+
+  // Sábado (6) até 16h
+  if (diaSemana === 6) {
+    horaFechamentoDia = 17;
+  }
+
+  for (let h = HORA_ABERTURA; h < horaFechamentoDia; h++) {
+
+    if (h === 12) continue;
+
+    const hora = String(h).padStart(2,"0")+":00";
+
+    const dataHora = new Date(
+      dataSelecionada.getFullYear(),
+      dataSelecionada.getMonth(),
+      dataSelecionada.getDate(),
+      h
+    );
+
+    if (
+      dataSelecionada.toDateString() === hoje.toDateString() &&
+      new Date() > dataHora
+    ) continue;
+
+    if (ocupados.includes(hora)) continue;
+
+    const btn = document.createElement("button");
+    btn.type="button";
+    btn.className="hora-btn";
+    btn.textContent=hora;
+
+    btn.onclick = () => {
+      document.querySelectorAll(".hora-btn").forEach(b=>b.classList.remove("ativa"));
+      btn.classList.add("ativa");
+      horaInput.value = hora;
+    };
+
+    horariosDiv.appendChild(btn);
+  }
+}
 
   dataInput.addEventListener("change", ()=>{
     if(dataInput.value) carregarHorarios(dataInput.value);
@@ -152,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-`📌 NOVO AGENDAMENTO
+`📌 NOVO AGENDAMENTO CONFIMADO✅
 
 👤 ${ag.nome}
 📅 ${formatarDataComDia(ag.data)}
@@ -163,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
 🔐 Código para cancelamento: ${codigoCancelamento}
 
 ⚠️ Guarde esse código caso precise cancelar.
-Cancelamento com 1 hora de antecedência.`
+⚠️Cancelamento com 1hora de antecedência.`
       )}`
     );
 
