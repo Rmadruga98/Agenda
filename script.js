@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const $ = id => document.getElementById(id);
   const db = window.db;
+  const auth = firebase.auth();
 
   /* ===== TOAST ===== */
   function mostrarMensagem(texto) {
@@ -151,7 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.open(
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
-        `📌 NOVO AGENDAMENTO\n
+`📌 NOVO AGENDAMENTO
+
 👤 ${ag.nome}
 📅 ${formatarDataComDia(ag.data)}
 ⏰ ${ag.hora}
@@ -161,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
 🔐 Código para cancelamento: ${codigoCancelamento}
 
 ⚠️ Guarde esse código caso precise cancelar.
-Cancelamento com 1hora de antecedência.`
+Cancelamento com 1 hora de antecedência.`
       )}`
     );
 
@@ -169,233 +171,140 @@ Cancelamento com 1hora de antecedência.`
     horariosDiv.innerHTML="";
   });
 
-/* ===== MEUS AGENDAMENTOS ===== */
+  /* ===== BLOQUEAR DIA ===== */
+  const btnBloquearDia = $("btnBloquearDia");
+  const dataBloqueio = $("dataBloqueio");
 
-const btnMeus = $("btnMeusAgendamentos");
-const areaMeus = $("areaMeusAgendamentos");
-const btnConsultar = $("btnConsultarAgendamentos");
-const listaMeus = $("listaMeusAgendamentos");
+  if (btnBloquearDia) {
+    btnBloquearDia.addEventListener("click", async () => {
 
-if (btnMeus) {
-  btnMeus.onclick = () => {
-    areaMeus.style.display =
-      areaMeus.style.display === "none" ? "block" : "none";
-  };
-}
-
-if (btnConsultar) {
-
-  btnConsultar.onclick = async () => {
-
-    const telefone = $("telefoneConsulta").value.trim();
-    const codigoDigitado = $("codigoConsulta").value.trim();
-
-    if (!telefone || !codigoDigitado) {
-      mostrarMensagem("Digite telefone e código.");
-      return;
-    }
-
-    listaMeus.innerHTML = "";
-
-    const snapshot = await db.collection("agendamentos")
-      .where("telefone", "==", telefone)
-      .get();
-
-    const agora = new Date();
-    let encontrou = false;
-
-    snapshot.forEach(doc => {
-
-      const a = doc.data();
-
-      const [A, M, D] = a.data.split("-").map(Number);
-      const [H, Mi] = a.hora.split(":").map(Number);
-      const dataHora = new Date(A, M - 1, D, H, Mi);
-
-      // 🔒 Validação forte
-      if (
-        dataHora >= agora &&
-        Number(a.codigoCancelamento) === Number(codigoDigitado)
-      ) {
-
-        encontrou = true;
-
-        const li = document.createElement("li");
-        li.innerHTML = `
-          📅 ${formatarDataComDia(a.data)}<br>
-          ⏰ ${a.hora}<br>
-          ✂️ ${a.servico}<br>
-        `;
-
-        const btnCancelar = document.createElement("button");
-        btnCancelar.textContent = "❌ Cancelar";
-        btnCancelar.style.marginTop = "8px";
-        btnCancelar.style.background = "#c0392b";
-        btnCancelar.style.color = "white";
-
-        btnCancelar.onclick = async () => {
-
-          if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
-
-          try {
-
-            await db.collection("agendamentos").doc(doc.id).delete();
-
-            const mensagem = `
-❌ CANCELAMENTO DE AGENDAMENTO
-
-👤 ${a.nome}
-📅 ${formatarDataComDia(a.data)}
-⏰ ${a.hora}
-✂️ ${a.servico}
-📱 ${a.telefone}
-`;
-
-            window.open(
-              `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`
-            );
-
-            mostrarMensagem("Agendamento cancelado com sucesso!");
-
-            li.remove();
-
-          } catch (error) {
-
-            mostrarMensagem("Erro ao cancelar agendamento.");
-
-          }
-
-        };
-
-        li.appendChild(btnCancelar);
-        listaMeus.appendChild(li);
-      }
-
-    });
-
-    if (!encontrou) {
-      listaMeus.innerHTML =
-        "<li>Nenhum agendamento encontrado ou código incorreto.</li>";
-    }
-
-  };
-
-}
-/* ===== LISTAR DIAS BLOQUEADOS ===== */
-async function carregarDiasBloqueados() {
-
-  const lista = $("listaDiasBloqueados");
-  if (!lista) return;
-
-  lista.innerHTML = "";
-
-  const snapshot = await db.collection("diasBloqueados").get();
-
-  if (snapshot.empty) {
-    lista.innerHTML = "<li>Nenhum dia bloqueado</li>";
-    return;
-  }
-
-  snapshot.forEach(doc => {
-
-    const li = document.createElement("li");
-    li.innerHTML = `
-      📅 ${doc.id}
-      <button class="btn-desbloquear">Desbloquear</button>
-    `;
-
-    li.querySelector("button").addEventListener("click", async () => {
-
-      const user = firebase.auth().currentUser;
+      const user = auth.currentUser;
 
       if (!user) {
-        mostrarMensagem("Você precisa estar logado como administrador.");
+        mostrarMensagem("Faça login como administrador.");
+        return;
+      }
+
+      if (!dataBloqueio.value) {
+        mostrarMensagem("Selecione uma data.");
         return;
       }
 
       try {
 
-        await db.collection("diasBloqueados").doc(doc.id).delete();
-        mostrarMensagem("Dia desbloqueado com sucesso!");
+        await db.collection("diasBloqueados")
+          .doc(dataBloqueio.value)
+          .set({ criadoEm: new Date() });
+
+        mostrarMensagem("Dia bloqueado com sucesso!");
+        dataBloqueio.value = "";
         carregarDiasBloqueados();
 
       } catch (error) {
-
-        mostrarMensagem("Erro ao desbloquear o dia.");
-
+        console.error(error);
+        mostrarMensagem("Erro ao bloquear o dia.");
       }
 
     });
+  }
 
-    lista.appendChild(li);
+  /* ===== LISTAR DIAS BLOQUEADOS ===== */
+  async function carregarDiasBloqueados() {
+
+    const lista = $("listaDiasBloqueados");
+    if (!lista) return;
+
+    lista.innerHTML = "";
+
+    const snapshot = await db.collection("diasBloqueados").get();
+
+    if (snapshot.empty) {
+      lista.innerHTML = "<li>Nenhum dia bloqueado</li>";
+      return;
+    }
+
+    snapshot.forEach(doc => {
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        📅 ${doc.id}
+        <button class="btn-desbloquear">Desbloquear</button>
+      `;
+
+      li.querySelector("button").addEventListener("click", async () => {
+
+        const user = auth.currentUser;
+
+        if (!user) {
+          mostrarMensagem("Você precisa estar logado como administrador.");
+          return;
+        }
+
+        try {
+          await db.collection("diasBloqueados").doc(doc.id).delete();
+          mostrarMensagem("Dia desbloqueado com sucesso!");
+          carregarDiasBloqueados();
+        } catch (error) {
+          mostrarMensagem("Erro ao desbloquear o dia.");
+        }
+
+      });
+
+      lista.appendChild(li);
+
+    });
+
+  }
+
+  /* ===== ADMIN LOGIN ===== */
+  const btnAdmin = $("btnAdmin");
+  const areaLoginAdmin = $("areaLoginAdmin");
+  const areaAdmin = $("areaAdmin");
+  const btnLoginAdmin = $("btnLoginAdmin");
+  const btnSairAdmin = $("btnSairAdmin");
+
+  let taps = 0;
+
+  document.querySelector("h1").addEventListener("click", () => {
+    taps++;
+    if (taps === 5) {
+      btnAdmin.style.display = "block";
+      mostrarMensagem("Modo administrador liberado");
+      taps = 0;
+    }
+  });
+
+  btnAdmin.addEventListener("click", () => {
+    areaLoginAdmin.style.display = "block";
+    btnAdmin.style.display = "none";
+  });
+
+  btnLoginAdmin.addEventListener("click", async () => {
+
+    const email = $("emailAdmin").value.trim();
+    const senha = $("senhaAdmin").value.trim();
+
+    if (!email || !senha) {
+      mostrarMensagem("Preencha email e senha");
+      return;
+    }
+
+    try {
+      await auth.signInWithEmailAndPassword(email, senha);
+      mostrarMensagem("Login realizado com sucesso");
+      areaLoginAdmin.style.display = "none";
+      areaAdmin.style.display = "block";
+      carregarDiasBloqueados();
+    } catch {
+      mostrarMensagem("Email ou senha incorretos");
+    }
 
   });
 
-}
-
-/* ================= ADMIN COM LOGIN FIREBASE ================= */
-
-const auth = firebase.auth();
-
-const btnAdmin = $("btnAdmin");
-const areaLoginAdmin = $("areaLoginAdmin");
-const areaAdmin = $("areaAdmin");
-const btnLoginAdmin = $("btnLoginAdmin");
-const btnSairAdmin = $("btnSairAdmin");
-
-let taps = 0;
-
-// Liberar botão admin ao clicar 5x no título
-document.querySelector("h1").addEventListener("click", () => {
-  taps++;
-  if (taps === 5) {
+  btnSairAdmin.addEventListener("click", async () => {
+    await auth.signOut();
+    areaAdmin.style.display = "none";
     btnAdmin.style.display = "block";
-    mostrarMensagem("Modo administrador liberado");
-    taps = 0;
-  }
-});
+  });
 
-// Abrir tela de login
-btnAdmin.addEventListener("click", () => {
-  areaLoginAdmin.style.display = "block";
-  btnAdmin.style.display = "none";
-});
-
-// Fazer login
-btnLoginAdmin.addEventListener("click", async () => {
-
-  const email = $("emailAdmin").value.trim();
-  const senha = $("senhaAdmin").value.trim();
-
-  if (!email || !senha) {
-    mostrarMensagem("Preencha email e senha");
-    return;
-  }
-
-  try {
-
-    await auth.signInWithEmailAndPassword(email, senha);
-
-    mostrarMensagem("Login realizado com sucesso");
-
-    areaLoginAdmin.style.display = "none";
-    areaAdmin.style.display = "block";
-
-    carregarAdmin();
-    carregarDiasBloqueados();
-
-  } catch (error) {
-
-    mostrarMensagem("Email ou senha incorretos");
-
-  }
-
-});
-
-// Sair do admin
-btnSairAdmin.addEventListener("click", async () => {
-  await auth.signOut();
-  areaAdmin.style.display = "none";
-  btnAdmin.style.display = "block";
-});
 });
