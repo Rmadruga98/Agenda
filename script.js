@@ -56,81 +56,96 @@ document.addEventListener("DOMContentLoaded", () => {
     precoInput.value = valor ? `R$ ${valor}` : "";
   });
 
- /*===== HORÁRIOS ===== */
+/*===== HORÁRIOS ===== */
 async function carregarHorarios(data) {
 
-  horariosDiv.innerHTML = "";
-  horaInput.value = "";
+  try {
 
-  const dataSelecionada = new Date(data + "T00:00");
+    horariosDiv.innerHTML = "";
+    horaInput.value = "";
 
-  // ❌ Não atende domingo (0) e segunda (1)
-  if (dataSelecionada.getDay() === 0 || dataSelecionada.getDay() === 1) {
-    horariosDiv.innerHTML = "<p class='dia-bloqueado'>❌ Não atendemos domingo e segunda</p>";
-    return;
-  }
+    const dataSelecionada = new Date(data + "T00:00");
 
-  const bloqueado = await db.collection("diasBloqueados").doc(data).get();
-  if (bloqueado.exists) {
-    horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado</p>";
-    return;
-  }
+    // ❌ Não atende domingo (0) e segunda (1)
+    if (dataSelecionada.getDay() === 0 || dataSelecionada.getDay() === 1) {
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>❌ Não atendemos domingo e segunda</p>";
+      return;
+    }
 
-  const snap = await db.collection("agendamentos")
-    .where("data", "==", data)
-    .get();
+    const bloqueado = await db.collection("diasBloqueados").doc(data).get();
+    if (bloqueado.exists) {
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>🔒 Dia bloqueado</p>";
+      return;
+    }
 
-  const ocupados = snap.docs.map(d => d.data().hora);
+    const snap = await db.collection("agendamentos")
+      .where("data", "==", data)
+      .get();
 
-  // 🔥 Definir horário de fechamento por dia
-  let horaFechamentoDia = HORA_FECHAMENTO;
-  const diaSemana = dataSelecionada.getDay();
+    const ocupados = snap.docs.map(d => d.data().hora);
 
-  // Terça (2) e Quarta (3) até 20h
-  if (diaSemana === 2 || diaSemana === 3) {
-    horaFechamentoDia = 21;
-  }
-  
-  // Quinta (4) e Sexta (5) até 17h)
-if (diaSemana ===4 || diaSemana ===5) {horaFechamentoDia = 18;}
+    let horaFechamentoDia = HORA_FECHAMENTO;
+    const diaSemana = dataSelecionada.getDay();
 
-  // Sábado (6) até as 16h
-  if (diaSemana === 6) {
-    horaFechamentoDia = 17;
-  }
+    // Terça e Quarta até 20h
+    if (diaSemana === 2 || diaSemana === 3) {
+      horaFechamentoDia = 21;
+    }
 
-  for (let h = HORA_ABERTURA; h < horaFechamentoDia; h++) {
+    // Quinta e Sexta até 17h
+    if (diaSemana === 4 || diaSemana === 5) {
+      horaFechamentoDia = 18; // mostra até 18:00
+    }
 
-    if (h === 12) continue;
+    // Sábado até 16h
+    if (diaSemana === 6) {
+      horaFechamentoDia = 17;
+    }
 
-    const hora = String(h).padStart(2,"0")+":00";
+    for (let h = HORA_ABERTURA; h < horaFechamentoDia; h++) {
 
-    const dataHora = new Date(
-      dataSelecionada.getFullYear(),
-      dataSelecionada.getMonth(),
-      dataSelecionada.getDate(),
-      h
-    );
+      if (h === 12) continue;
 
-    if (
-      dataSelecionada.toDateString() === hoje.toDateString() &&
-      new Date() > dataHora
-    ) continue;
+      const hora = String(h).padStart(2,"0")+":00";
 
-    if (ocupados.includes(hora)) continue;
+      const dataHora = new Date(
+        dataSelecionada.getFullYear(),
+        dataSelecionada.getMonth(),
+        dataSelecionada.getDate(),
+        h
+      );
 
-    const btn = document.createElement("button");
-    btn.type="button";
-    btn.className="hora-btn";
-    btn.textContent=hora;
+      if (
+        dataSelecionada.toDateString() === hoje.toDateString() &&
+        new Date() > dataHora
+      ) continue;
 
-    btn.onclick = () => {
-      document.querySelectorAll(".hora-btn").forEach(b=>b.classList.remove("ativa"));
-      btn.classList.add("ativa");
-      horaInput.value = hora;
-    };
+      if (ocupados.includes(hora)) continue;
 
-    horariosDiv.appendChild(btn);
+      const btn = document.createElement("button");
+      btn.type="button";
+      btn.className="hora-btn";
+      btn.textContent=hora;
+
+      btn.onclick = () => {
+        document.querySelectorAll(".hora-btn").forEach(b=>b.classList.remove("ativa"));
+        btn.classList.add("ativa");
+        horaInput.value = hora;
+      };
+
+      horariosDiv.appendChild(btn);
+    }
+
+    // 🔥 Se não tiver horário disponível
+    if (horariosDiv.innerHTML === "") {
+      horariosDiv.innerHTML = "<p class='dia-bloqueado'>⚠️ Todos horários já foram preenchidos</p>";
+    }
+
+  } catch (error) {
+
+    console.error("Erro ao carregar horários:", error);
+    horariosDiv.innerHTML = "<p class='dia-bloqueado'>Erro ao carregar horários</p>";
+
   }
 }
 
