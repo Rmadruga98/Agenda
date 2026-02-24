@@ -183,8 +183,7 @@ async function carregarHorarios(data) {
 
     mostrarMensagem("Agendamento realizado com sucesso!");
 
-    window.open(
-      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+const mensagem = 
 `📌 NOVO AGENDAMENTO CONFIRMADO✅
 
 👤 ${ag.nome}
@@ -196,12 +195,16 @@ async function carregarHorarios(data) {
 🔐 Código para cancelamento: ${codigoCancelamento}
 
 ⚠️ Guarde esse código caso precise cancelar.
-⚠️Cancelamento com 1hora de antecedência.`
-      )}`
-    );
+⚠️ Cancelamento com 1 hora de antecedência.`;
 
-    form.reset();
-    horariosDiv.innerHTML="";
+const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
+
+setTimeout(() => {
+  window.location.href = url;
+}, 500);
+
+form.reset();
+horariosDiv.innerHTML="";
   });
 
   /* ===== MEUS AGENDAMENTOS ===== */
