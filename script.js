@@ -549,14 +549,11 @@ async function carregarAdmin() {
 
     btnInstalar.style.display="none";
 
-    window.addEventListener("beforeinstallprompt",(e)=>{
-      e.preventDefault();
-      deferredPrompt=e;
-
-      if(!window.matchMedia('(display-mode: standalone)').matches){
-        btnInstalar.style.display="block";
-      }
-    });
+   window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstalar.style.display = "block";
+});
 
     btnInstalar.onclick=async()=>{
       if(!deferredPrompt) return;
