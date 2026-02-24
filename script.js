@@ -386,9 +386,15 @@ async function carregarAdmin() {
   let faturamentoHoje = 0;
   let proximoCliente = null;
 
-  const snapshot = await db.collection("agendamentos").get();
+  const snapshot = await db.collection("agendamentos")
+    .orderBy("data")
+    .orderBy("hora")
+    .get();
+
   const agora = new Date();
   const hojeStr = agora.toISOString().split("T")[0];
+
+  let dataAtual = "";
 
   snapshot.forEach(doc => {
 
@@ -398,17 +404,7 @@ async function carregarAdmin() {
     const [H, Mi] = a.hora.split(":").map(Number);
     const dataHora = new Date(A, M - 1, D, H, Mi);
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      📅 ${formatarDataComDia(a.data)}<br>
-      ⏰ ${a.hora}<br>
-      ✂️ ${a.servico}<br>
-      👤 ${a.nome}<br>
-      📱 ${a.telefone}
-    `;
-
-    /* ===== DASHBOARD ===== */
-
+    // ===== DASHBOARD =====
     if (a.data === hojeStr) {
       qtdHoje++;
       faturamentoHoje += Number(a.preco);
@@ -424,9 +420,27 @@ async function carregarAdmin() {
       }
     }
 
-    /* ===== AGENDA ATIVA ===== */
-
+    // ===== AGENDA ATIVA =====
     if (dataHora >= agora) {
+
+      // Criar título da data se mudou
+      if (a.data !== dataAtual) {
+
+        dataAtual = a.data;
+
+        const tituloData = document.createElement("h3");
+        tituloData.style.marginTop = "20px";
+        tituloData.textContent = formatarDataComDia(a.data);
+
+        listaAg.appendChild(tituloData);
+      }
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        ⏰ ${a.hora} – ✂️ ${a.servico}<br>
+        👤 ${a.nome}<br>
+        📱 ${a.telefone}
+      `;
 
       const btnRemover = document.createElement("button");
       btnRemover.textContent = "❌ Remover";
@@ -435,13 +449,10 @@ async function carregarAdmin() {
       btnRemover.style.color = "white";
 
       btnRemover.onclick = async () => {
-
         if (!confirm("Deseja remover este agendamento?")) return;
-
         await db.collection("agendamentos").doc(doc.id).delete();
         mostrarMensagem("Agendamento removido com sucesso!");
         carregarAdmin();
-
       };
 
       li.appendChild(btnRemover);
@@ -449,15 +460,23 @@ async function carregarAdmin() {
 
     } else {
 
+      // ===== HISTÓRICO =====
+      const li = document.createElement("li");
       li.style.opacity = "0.6";
-      listaHist.appendChild(li);
+      li.innerHTML = `
+        📅 ${formatarDataComDia(a.data)}<br>
+        ⏰ ${a.hora}<br>
+        ✂️ ${a.servico}<br>
+        👤 ${a.nome}<br>
+        📱 ${a.telefone}
+      `;
 
+      listaHist.appendChild(li);
     }
 
   });
 
-  /* ===== ATUALIZAR DASHBOARD ===== */
-
+  // ===== ATUALIZAR DASHBOARD =====
   if (qtdHojeEl) qtdHojeEl.textContent = qtdHoje;
   if (faturamentoHojeEl) faturamentoHojeEl.textContent = `R$ ${faturamentoHoje}`;
 
