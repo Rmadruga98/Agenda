@@ -183,7 +183,7 @@ async function carregarHorarios(data) {
 
     mostrarMensagem("Agendamento realizado com sucesso!");
 
-const mensagem = 
+const mensagem =
 `📌 NOVO AGENDAMENTO CONFIRMADO✅
 
 👤 ${ag.nome}
@@ -201,7 +201,8 @@ const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
 
 setTimeout(() => {
   window.location.href = url;
-}, 500);
+}, 300);
+
 
 form.reset();
 horariosDiv.innerHTML="";
@@ -276,16 +277,21 @@ horariosDiv.innerHTML="";
 
             await db.collection("agendamentos").doc(doc.id).delete();
 
-            window.open(
-              `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+const mensagemCancelamento =
 `❌ CANCELAMENTO DE AGENDAMENTO
 
 👤 ${a.nome}
 📅 ${formatarDataComDia(a.data)}
 ⏰ ${a.hora}
 ✂️ ${a.servico}
-📱 ${a.telefone}`)}`
-            );
+📱 ${a.telefone}`;
+
+const urlCancelamento =
+`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
+
+setTimeout(() => {
+  window.location.href = urlCancelamento;
+}, 300);
 
             mostrarMensagem("Agendamento cancelado com sucesso!");
             li.remove();
