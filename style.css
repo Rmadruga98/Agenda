@@ -48,7 +48,7 @@ h1 {
   text-align: center;
   font-size: 30px;
   color: #d4af37;
-  opacity: 0.8;
+  opacity: 2.8;
 }
 
 .barbeiro-nome {
@@ -96,7 +96,7 @@ button:hover {
 
 .btn-instalar {
   display: block;
-  margin: 15px auto;
+  margin: 20px auto;
 }
 
 #btnRelatorioDiario,
