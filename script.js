@@ -154,36 +154,62 @@ async function carregarHorarios(data) {
   });
 
   /* ===== AGENDAR ===== */
-  form.addEventListener("submit", async e=>{
-    e.preventDefault();
+form.addEventListener("submit", async e => {
+  e.preventDefault();
 
-    const nome = $("nome").value.trim();
-    const telefone = $("telefone").value.trim();
-    const servico = servicoSelect.value;
+  const btnSubmit = form.querySelector("button[type='submit']");
+  btnSubmit.disabled = true;
 
-    if(!nome || !telefone || !dataInput.value || !horaInput.value || !servico){
-      mostrarMensagem("Preencha todos os campos.");
+  const nome = $("nome").value.trim();
+  const telefone = $("telefone").value.trim();
+  const servico = servicoSelect.value;
+
+  if (!nome || !telefone || !dataInput.value || !horaInput.value || !servico) {
+    mostrarMensagem("Preencha todos os campos.");
+    btnSubmit.disabled = false;
+    return;
+  }
+
+  const codigoCancelamento = Math.floor(1000 + Math.random() * 9000);
+
+  const ag = {
+    nome,
+    telefone,
+    data: dataInput.value,
+    hora: horaInput.value,
+    servico,
+    preco: servicos[servico],
+    codigoCancelamento,
+    criadoEm: new Date()
+  };
+
+  try {
+
+    // 🔥 Verifica se horário ainda está disponível (anti conflito)
+    const verifica = await db.collection("agendamentos")
+      .where("data", "==", ag.data)
+      .where("hora", "==", ag.hora)
+      .get();
+
+    if (!verifica.empty) {
+      mostrarMensagem("Esse horário acabou de ser reservado!");
+      btnSubmit.disabled = false;
+      carregarHorarios(ag.data);
       return;
     }
 
-    const codigoCancelamento = Math.floor(1000 + Math.random() * 9000);
-
-    const ag = {
-      nome,
-      telefone,
-      data:dataInput.value,
-      hora:horaInput.value,
-      servico,
-      preco:servicos[servico],
-      codigoCancelamento,
-      criadoEm:new Date()
-    };
-
     await db.collection("agendamentos").add(ag);
 
-    mostrarMensagem("Agendamento realizado com sucesso!");
+  } catch (error) {
+    console.error(error);
+    mostrarMensagem("Erro ao salvar agendamento. Tente novamente.");
+    btnSubmit.disabled = false;
+    return;
+  }
 
-const mensagem =
+  mostrarMensagem("Agendamento realizado com sucesso!");
+
+  const mensagem =
 `📌 NOVO AGENDAMENTO CONFIRMADO✅
 
 👤 ${ag.nome}
@@ -197,16 +223,15 @@ const mensagem =
 ⚠️ Guarde esse código caso precise cancelar.
 ⚠️ Cancelamento com 1 hora de antecedência.`;
 
-const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
+  const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
 
-setTimeout(() => {
-  window.location.href = url;
-}, 300);
+  setTimeout(() => {
+    window.location.href = url;
+  }, 300);
 
-
-form.reset();
-horariosDiv.innerHTML="";
-  });
+  form.reset();
+  horariosDiv.innerHTML = "";
+});
 
   /* ===== MEUS AGENDAMENTOS ===== */
 
@@ -394,6 +419,10 @@ async function carregarAdmin() {
   let qtdHoje = 0;
   let faturamentoHoje = 0;
   let proximoCliente = null;
+  
+  let faturamentoMes = 0;
+  let qtdMes = 0;
+  let faturamentoMesAnterior = 0;
 
   const snapshot = await db.collection("agendamentos")
     .orderBy("data")
@@ -412,6 +441,24 @@ async function carregarAdmin() {
     const [A, M, D] = a.data.split("-").map(Number);
     const [H, Mi] = a.hora.split(":").map(Number);
     const dataHora = new Date(A, M - 1, D, H, Mi);
+
+const mesAtual = agora.getMonth();
+const anoAtual = agora.getFullYear();
+
+if (dataHora.getMonth() === mesAtual && dataHora.getFullYear() === anoAtual) {
+  faturamentoMes += Number(a.preco);
+  qtdMes++;
+}
+
+const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+
+if (
+  dataHora.getMonth() === mesAnterior &&
+  dataHora.getFullYear() === anoMesAnterior
+) {
+  faturamentoMesAnterior += Number(a.preco);
+}
 
     // ===== DASHBOARD =====
     if (a.data === hojeStr) {
@@ -498,7 +545,15 @@ async function carregarAdmin() {
     }
   }
 
+const faturamentoMesEl = $("faturamentoMes");
+const qtdMesEl = $("qtdMes");
+const faturamentoMesAnteriorEl = $("faturamentoMesAnterior");
+
+if (faturamentoMesEl) faturamentoMesEl.textContent = `R$ ${faturamentoMes}`;
+if (qtdMesEl) qtdMesEl.textContent = qtdMes;
+if (faturamentoMesAnteriorEl) faturamentoMesAnteriorEl.textContent = `R$ ${faturamentoMesAnterior}`;
 }
+
 
   /* ===== ADMIN LOGIN ===== */
 
