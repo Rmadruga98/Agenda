@@ -3,59 +3,67 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Anton', sans-serif;
 }
 
+/* ===== BASE ===== */
 body {
-  background: #111;
-  color: white;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-body {
-  background: linear-gradient(135deg, #111, #1c1c1c);
+  background: linear-gradient(160deg, #0f0f0f 0%, #1a1a1a 50%, #111 100%);
   color: #fff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;
+  scroll-behavior: smooth;
 }
 
+/* ===== CONTAINER ===== */
 .container {
   width: 95%;
-  max-width: 500px;
-  padding: 20px;
+  max-width: 520px;
+  padding: 20px 20px 40px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== LOGO ===== */
 .logo-wrapper {
   text-align: center;
-  margin-bottom: 12px;
+  margin: 10px 0 14px;
 }
 
 .logo {
-  width: 200px;
+  width: 180px;
+  filter: drop-shadow(0 4px 12px rgba(212,175,55,0.25));
 }
 
 /* ===== TÍTULOS ===== */
 h1 {
   text-align: center;
+  font-family: 'Anton', sans-serif;
   font-size: 28px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   letter-spacing: 1px;
+  color: #fff;
 }
 
 .barber-nome {
   text-align: center;
+  font-family: 'Anton', sans-serif;
   font-size: 30px;
   color: #d4af37;
-  opacity: 2.8;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
 }
 
 .barbeiro-nome {
   text-align: center;
-  font-size: 18px;
-  opacity: 0.6;
-  margin-bottom: 20px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 24px;
 }
 
 /* ===== FORM ===== */
@@ -65,44 +73,148 @@ form {
   gap: 10px;
 }
 
-input, select, button {
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-label {
+  font-size: 11px;
+  font-weight: 400;
+  color: #d4af37;
 }
 
 input, select {
-  background: #2a2a2a;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #2e2e2e;
+  font-size: 14px;
+  background: #1e1e1e;
   color: white;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
 }
 
+input:focus, select:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+select option {
+  background: #1e1e1e;
+}
+
+/* ===== PREÇO ===== */
+.preco-box {
+  background: linear-gradient(135deg, #1a1a1a, #242424);
+  border: 1.5px solid #d4af37;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.3s ease;
+}
+
+.preco-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+
+.preco-valor {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+/* ===== BOTÕES ===== */
 button {
-  background: #d4af37;
-  color: black;
-  font-weight: bold;
+  padding: 13px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.25s ease;
 }
 
-button:hover {
-  transform: scale(1.03);
-  background: #f1c40f;
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
-#btnAdmin {
-  margin-top: 20px;
+/* Botão principal */
+button[type="submit"] {
+  background: linear-gradient(135deg, #d4af37, #f1c40f);
+  color: #000;
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba(212,175,55,0.35);
+  margin-top: 6px;
 }
 
+button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212,175,55,0.5);
+}
+
+/* Botão secundário */
+.btn-secundario {
+  background: #2a2a2a;
+  color: #d4af37;
+  border: 1.5px solid #d4af37;
+}
+
+.btn-secundario:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+/* Botão instalar */
 .btn-instalar {
   display: block;
-  margin: 20px auto;
+  margin: 0 auto 16px;
+  background: #2a2a2a;
+  color: #d4af37;
+  border: 1px solid #d4af37;
+  font-size: 13px;
+  padding: 10px 18px;
 }
 
-#btnRelatorioDiario,
-#btnSairAdmin {
-  margin-top: 15px;
-  width: 100%;
+.btn-instalar:hover {
+  background: #d4af37;
+  color: #000;
+}
+
+/* Botão admin oculto */
+.btn-admin-hidden {
+  margin-top: 20px;
+  background: #222;
+  color: #888;
+  border: 1px dashed #444;
+  font-size: 12px;
+}
+
+/* ===== HINT HORÁRIO ===== */
+.hint-horario {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  padding: 16px;
+  border: 1px dashed #333;
+  border-radius: 10px;
 }
 
 /* ===== HORÁRIOS GRID ===== */
@@ -113,176 +225,381 @@ button:hover {
 }
 
 .hora-btn {
-  background: #2a2a2a;
+  background: #1e1e1e;
   color: white;
-  border-radius: 6px;
-  padding: 10px;
+  border: 1.5px solid #2e2e2e;
+  border-radius: 8px;
+  padding: 11px 8px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .hora-btn:hover {
-  background: #444;
-}
-
-.hora-btn.ativa {
-  background: #d4af37;
-  color: black;
-  font-weight: bold;
-}
-
-/* ===== ADMIN ===== */
-#areaAdmin {
-  margin-top: 20px;
-  padding: 15px;
-  background: #222;
-  border-radius: 10px;
-}
-
-ul {
-  list-style: none;
-  margin-top: 10px;
-}
-
-li {
-  background: #2a2a2a;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  font-size: 13px;
-}
-
-/* ===== MENSAGEM BONITA ===== */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #d4af37;
-  color: black;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  opacity: 0;
-  animation: fadeInOut 3s forwards;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; bottom: 10px; }
-  10% { opacity: 1; bottom: 20px; }
-  90% { opacity: 1; }
-  100% { opacity: 0; bottom: 10px; }
-}
-
-.rodape {
-  text-align: center;
-  margin-top: 20px;
-  opacity: 0.5;
-  font-size: 12px;
-}
-
-.financeiro-box {
-  background: #2a2a2a;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
-.financeiro-box p {
-  margin-bottom: 8px;
-}
-
-.dashboard-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: #2a2a2a;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.card h3 {
-  font-size: 14px;
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-
-.card p {
-  font-size: 20px;
-  font-weight: bold;
+  background: #2e2e2e;
+  border-color: #d4af37;
   color: #d4af37;
 }
 
-#btnRelatorioDiario {
-  background: #28a745; /* verde */
-  color: white;
+.hora-btn.ativa {
+  background: linear-gradient(135deg, #d4af37, #f1c40f);
+  color: #000;
+  border-color: transparent;
+  box-shadow: 0 2px 10px rgba(212,175,55,0.4);
+  font-weight: 700;
 }
 
-#btnRelatorioDiario:hover {
-  background: #218838;
+/* ===== LOADING HORÁRIOS ===== */
+.loading-horarios {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
 }
 
-#btnSairAdmin {
-  background: #444;
-  color: #ccc;
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(212,175,55,0.3);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
-#btnSairAdmin:hover {
-  background: #666;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
+/* ===== DIA BLOQUEADO ===== */
 .dia-bloqueado {
-  background: linear-gradient(135deg, #8b0000, #b30000);
-  color: white;
-  padding: 18px;
+  background: linear-gradient(135deg, #6b0000, #8b0000);
+  color: #ffaaaa;
+  padding: 16px 20px;
   border-radius: 12px;
   text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-
-  width: 80%;
-  max-width: 260px;
-
-  margin: 15px auto; /* CENTRALIZA O BLOCO */
-
-  animation: pulse 1.5s infinite;
+  font-size: 15px;
+  font-weight: 600;
+  grid-column: 1 / -1;
+  animation: pulse 2s infinite;
+  border: 1px solid rgba(255,0,0,0.3);
 }
 
-.horarios .dia-bloqueado {
-  grid-column: 1 / -1; /* ocupa todas as colunas do grid */
-  justify-self: center; /* centraliza horizontalmente dentro do grid */
-}
 @keyframes pulse {
-  0% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-  }
-  50% { 
-    transform: scale(1.08);
-    box-shadow: 0 0 20px 8px rgba(255, 0, 0, 0.6);
-  }
-  100% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
-  }
+  0%   { box-shadow: 0 0 0 0 rgba(200, 0, 0, 0.5); }
+  50%  { box-shadow: 0 0 18px 5px rgba(200, 0, 0, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 0, 0, 0); }
 }
 
+/* ===== ÁREA MEUS AGENDAMENTOS ===== */
 #areaMeusAgendamentos {
-  margin-top: 15px;
-  background: #222;
-  padding: 15px;
-  border-radius: 10px;
+  margin-top: 6px;
+  background: #1a1a1a;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #2e2e2e;
+  animation: fadeIn 0.3s ease;
 }
 
-#listaMeusAgendamentos li {
-  background: #2a2a2a;
-  margin-bottom: 8px;
-  padding: 10px;
+#areaMeusAgendamentos h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #d4af37;
+}
+
+#listaMeusAgendamentos {
+  margin-top: 12px;
+}
+
+/* ===== ADMIN LOGIN ===== */
+.area-login {
+  margin-top: 20px;
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #2e2e2e;
+  animation: fadeIn 0.3s ease;
+}
+
+.area-login h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.erro-login {
+  color: #ff6b6b;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(255,0,0,0.1);
   border-radius: 8px;
+}
+
+/* ===== ÁREA ADMIN ===== */
+#areaAdmin {
+  margin-top: 20px;
+  padding: 18px;
+  background: #161616;
+  border-radius: 14px;
+  border: 1px solid #2a2a2a;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.btn-refresh {
+  background: #2a2a2a;
+  color: #d4af37;
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+.btn-refresh:hover {
+  background: #333;
+  transform: rotate(180deg);
+}
+
+.secao-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 16px 0 8px;
+}
+
+/* ===== DASHBOARD CARDS ===== */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: #1e1e1e;
+  padding: 14px 12px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #2a2a2a;
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: #d4af37;
+}
+
+.card-destaque {
+  border-color: rgba(212,175,55,0.4);
+}
+
+.card h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card p {
+  font-size: 16px;
+  font-weight: 700;
+  color: #d4af37;
+  line-height: 1.2;
+}
+
+/* ===== LISTAS ===== */
+ul {
+  list-style: none;
+  margin-top: 8px;
+}
+
+li {
+  background: #1e1e1e;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  border-left: 3px solid #d4af37;
+  line-height: 1.6;
+  transition: background 0.2s;
+}
+
+li:hover {
+  background: #242424;
+}
+
+/* ===== BOTÕES ADMIN ===== */
+.admin-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-relatorio {
+  background: linear-gradient(135deg, #1e6b32, #28a745);
+  color: white;
+  font-size: 14px;
+}
+
+.btn-relatorio:hover:not(:disabled) {
+  background: linear-gradient(135deg, #28a745, #34ce57);
+  transform: translateY(-1px);
+}
+
+.btn-sair {
+  background: #2a2a2a;
+  color: #aaa;
+}
+
+.btn-sair:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
+
+.btn-perigo {
+  background: #2a2a2a;
+  color: #ff6b6b;
+  border: 1px solid rgba(255,100,100,0.3);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.btn-perigo:hover {
+  background: rgba(255,0,0,0.15);
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #d4af37, #f1c40f);
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.5);
+  opacity: 0;
+  animation: toastAnim 3.5s forwards;
+  pointer-events: none;
+}
+
+.toast.toast-erro {
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: white;
+  box-shadow: 0 4px 20px rgba(192,57,43,0.5);
+}
+
+@keyframes toastAnim {
+  0%   { opacity: 0; bottom: 10px; }
+  12%  { opacity: 1; bottom: 24px; }
+  85%  { opacity: 1; bottom: 24px; }
+  100% { opacity: 0; bottom: 10px; }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-box {
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+
+.modal-box h3 {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #d4af37;
+}
+
+.modal-resumo {
+  background: #222;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 18px;
+  border: 1px solid #2e2e2e;
+}
+
+.modal-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-modal-cancelar {
+  background: #2a2a2a;
+  color: #aaa;
+}
+
+.btn-modal-cancelar:hover {
+  background: #333;
+  color: #fff;
+}
+
+.btn-modal-confirmar {
+  background: linear-gradient(135deg, #d4af37, #f1c40f);
+  color: #000;
+}
+
+.btn-modal-confirmar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+}
+
+/* ===== RODAPÉ ===== */
+.rodape {
+  text-align: center;
+  margin-top: 30px;
+  color: rgba(255,255,255,0.3);
+  font-size: 12px;
+}
+
+/* ===== RESPONSIVE TABLET ===== */
+@media (min-width: 480px) {
+  .container {
+    padding: 28px 28px 48px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  .horarios {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

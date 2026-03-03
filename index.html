@@ -4,14 +4,26 @@
   <meta charset="UTF-8">
   <title>Agendamento - Barbearia Madruga</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Agende seu horário na Barbearia Madruga. Cortes, barba e muito mais!">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1c1c">
   <link rel="icon" href="logo.png">
 
+  <!-- Apple PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Madruga">
+  <link rel="apple-touch-icon" href="logo-192.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Barbearia Madruga – Agendamento Online">
+  <meta property="og:description" content="Agende seu horário de forma rápida e fácil!">
+  <meta property="og:image" content="logo-512.png">
+
   <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css">
@@ -25,10 +37,10 @@
     <img src="logo.png" alt="Logo da Barbearia Madruga" class="logo">
   </div>
 
-  <h1> Agendamento Online 💈</h1>
+  <h1>Agendamento Online 💈</h1>
 
   <!-- BOTÃO INSTALAR -->
-  <button id="btnInstalar" class="btn-instalar" aria-label="Instalar aplicativo">
+  <button id="btnInstalar" class="btn-instalar" aria-label="Instalar aplicativo" style="display:none;">
     📲 Instalar aplicativo
   </button>
 
@@ -38,174 +50,190 @@
   <!-- FORMULÁRIO -->
   <form id="formAgendamento" novalidate>
 
-    <label for="nome">Nome:</label>
-    <input 
-      id="nome" 
-      name="nome" 
-      type="text" 
-      required 
-      placeholder="Digite seu nome" 
+    <label for="nome">Nome completo:</label>
+    <input
+      id="nome"
+      name="nome"
+      type="text"
+      required
+      placeholder="Digite seu nome"
       minlength="2"
+      autocomplete="name"
     >
 
     <label for="telefone">WhatsApp:</label>
-    <input 
-      id="telefone" 
-      name="telefone" 
-      type="tel" 
-      required 
-      placeholder="11999999999" 
-      pattern="[0-9]{11}"
+    <input
+      id="telefone"
+      name="telefone"
+      type="tel"
+      required
+      placeholder="(11) 99999-9999"
+      autocomplete="tel"
+      maxlength="15"
     >
 
     <label for="data">Data:</label>
-    <input 
-      type="date" 
-      id="data" 
-      name="data" 
+    <input
+      type="date"
+      id="data"
+      name="data"
       required
     >
 
-    <label>Horário:</label>
-    <div id="horarios" class="horarios"></div>
+    <label>Horário: <span id="horarioLabel" class="hint-label"></span></label>
+    <div id="horarios" class="horarios">
+      <p class="hint-horario">👆 Selecione uma data para ver os horários disponíveis</p>
+    </div>
     <input type="hidden" id="hora" name="hora">
 
     <label for="servico">Serviço:</label>
     <select id="servico" name="servico" required>
-      <option disabled selected>Selecione</option>
-      <option>Corte Simples</option>
-      <option>Corte Degradê</option>
-      <option>Corte Navalhado</option>
-      <option>Barba</option>
-      <option>Corte + Barba</option>
-      <option>Sobrancelha</option>
-      <option>Pezinho</option>
-      <option>Corte + Barba + Sobrancelha</option>
-      <option>Pigmentação + Corte</option>
-      <option>Luzes + Corte</option>
-      <option>Platinado + Corte</option>
+      <option disabled selected value="">Selecione um serviço</option>
+      <option value="Corte Simples">Corte Simples</option>
+      <option value="Corte Degradê">Corte Degradê</option>
+      <option value="Corte Navalhado">Corte Navalhado</option>
+      <option value="Barba">Barba</option>
+      <option value="Corte + Barba">Corte + Barba</option>
+      <option value="Sobrancelha">Sobrancelha</option>
+      <option value="Pezinho">Pezinho</option>
+      <option value="Corte + Barba + Sobrancelha">Corte + Barba + Sobrancelha</option>
+      <option value="Pigmentação + Corte">Pigmentação + Corte</option>
+      <option value="Luzes + Corte">Luzes + Corte</option>
+      <option value="Platinado + Corte">Platinado + Corte</option>
     </select>
 
-    <label for="preco">Preço:</label>
-    <input id="preco" name="preco" readonly>
+    <div id="precoBox" class="preco-box" style="display:none;">
+      <span class="preco-label">💰 Valor do serviço:</span>
+      <span id="precoValor" class="preco-valor"></span>
+    </div>
+    <input type="hidden" id="preco" name="preco">
 
-    <button type="submit">Agendar</button>
+    <button type="submit" id="btnAgendar">
+      <span id="btnAgendarText">✅ Confirmar Agendamento</span>
+      <span id="btnAgendarLoading" style="display:none;">⏳ Agendando...</span>
+    </button>
 
-<button type="button" id="btnMeusAgendamentos">
-  📋 Ver meus agendamentos
-</button>
+    <!-- MEUS AGENDAMENTOS -->
+    <button type="button" id="btnMeusAgendamentos" class="btn-secundario">
+      📋 Ver meus agendamentos
+    </button>
 
-<div id="areaMeusAgendamentos" style="display:none;">
-  <input type="tel" id="telefoneConsulta" placeholder="Digite seu WhatsApp">
-
-<input type="number" id="codigoConsulta"
-         placeholder="Digite o código de cancelamento">
-         
-  <button type="button" id="btnConsultarAgendamentos">Consultar</button>
-
-  <ul id="listaMeusAgendamentos"></ul>
-</div>
+    <div id="areaMeusAgendamentos" style="display:none;">
+      <h3 style="margin-bottom:10px;">🔍 Consultar agendamento</h3>
+      <input type="tel" id="telefoneConsulta" placeholder="(11) 99999-9999" maxlength="15">
+      <input type="number" id="codigoConsulta" placeholder="Código de cancelamento (4 dígitos)" min="1000" max="9999">
+      <button type="button" id="btnConsultarAgendamentos">
+        <span id="btnConsultarText">🔍 Consultar</span>
+        <span id="btnConsultarLoading" style="display:none;">⏳ Buscando...</span>
+      </button>
+      <ul id="listaMeusAgendamentos"></ul>
+    </div>
 
   </form>
 
-<!-- BOTÃO ADMIN -->
-<button id="btnAdmin" style="display:none;">
-  🔒 Área do Administrador
-</button>
-
-<!-- LOGIN ADMIN -->
-<div id="areaLoginAdmin" style="display:none;">
-
-  <h2>🔐 Login Administrador</h2>
-
-  <input type="email" id="emailAdmin" placeholder="Email">
-  <input type="password" id="senhaAdmin" placeholder="Senha">
-
-  <button type="button" id="btnLoginAdmin">
-    Entrar
+  <!-- BOTÃO ADMIN (oculto) -->
+  <button id="btnAdmin" style="display:none;" class="btn-admin-hidden">
+    🔒 Área do Administrador
   </button>
 
-</div>
-
-<!-- ÁREA ADMIN -->
-<div id="areaAdmin" style="display:none;">
-    
-    <h2>📊 Dashboard</h2>
-
-<div class="dashboard-cards">
-  <div class="card">
-    <h3>📅 Agendamentos Hoje</h3>
-    <p id="qtdHoje">0</p>
+  <!-- LOGIN ADMIN -->
+  <div id="areaLoginAdmin" style="display:none;" class="area-login">
+    <h2>🔐 Login Administrador</h2>
+    <input type="email" id="emailAdmin" placeholder="E-mail" autocomplete="email">
+    <input type="password" id="senhaAdmin" placeholder="Senha" autocomplete="current-password">
+    <button type="button" id="btnLoginAdmin">
+      <span id="btnLoginText">Entrar</span>
+      <span id="btnLoginLoading" style="display:none;">⏳ Entrando...</span>
+    </button>
+    <p id="erroLogin" class="erro-login" style="display:none;"></p>
   </div>
 
-  <div class="card">
-    <h3>💰 Faturamento Hoje</h3>
-    <p id="faturamentoHoje">R$ 0</p>
-  </div>
+  <!-- ÁREA ADMIN -->
+  <div id="areaAdmin" style="display:none;">
 
-  <div class="card">
-    <h3>⏰ Próximo Cliente</h3>
-    <p id="proximoCliente">Nenhum</p>
-  </div>
-</div>
+    <div class="admin-header">
+      <h2>📊 Dashboard</h2>
+      <button id="btnRefreshAdmin" class="btn-refresh" title="Atualizar">🔄</button>
+    </div>
 
-<h2>📅 Faturamento Mensal</h2>
+    <!-- CARDS HOJE -->
+    <p class="secao-label">📅 Hoje</p>
+    <div class="dashboard-cards">
+      <div class="card">
+        <h3>📅 Agendamentos</h3>
+        <p id="qtdHoje">0</p>
+      </div>
+      <div class="card">
+        <h3>💰 Faturamento</h3>
+        <p id="faturamentoHoje">R$ 0</p>
+      </div>
+      <div class="card card-destaque">
+        <h3>⏰ Próximo</h3>
+        <p id="proximoCliente">Nenhum</p>
+      </div>
+    </div>
 
-<div class="dashboard-cards">
-  <div class="card">
-    <h3>💰 Mês Atual</h3>
-    <p id="faturamentoMes">R$ 0</p>
-  </div>
-
-  <div class="card">
-    <h3>📋 Atendimentos no Mês</h3>
-    <p id="qtdMes">0</p>
-  </div>
-
-  <div class="card">
-    <h3>📉 Mês Anterior</h3>
-    <p id="faturamentoMesAnterior">R$ 0</p>
-  </div>
-</div>
+    <!-- CARDS MÊS -->
+    <p class="secao-label">📆 Mês</p>
+    <div class="dashboard-cards">
+      <div class="card">
+        <h3>💰 Mês Atual</h3>
+        <p id="faturamentoMes">R$ 0</p>
+      </div>
+      <div class="card">
+        <h3>📋 Atendimentos</h3>
+        <p id="qtdMes">0</p>
+      </div>
+      <div class="card">
+        <h3>📉 Mês Anterior</h3>
+        <p id="faturamentoMesAnterior">R$ 0</p>
+      </div>
+    </div>
 
     <h2>📋 Agenda Ativa</h2>
     <ul id="listaAgendamentos"></ul>
-    
 
     <h2>📚 Histórico</h2>
     <ul id="listaHistorico"></ul>
-    
-    <button id="btnLimparHistorico">🧹 Apagar histórico</button>
+    <button id="btnLimparHistorico" class="btn-perigo">🧹 Apagar histórico</button>
 
     <h2>📅 Controle de Dias</h2>
-
-    <h3>📅 Dias bloqueados</h3>
+    <h3>Dias bloqueados</h3>
     <ul id="listaDiasBloqueados"></ul>
-
-    <hr style="margin:20px 0">
-
+    <hr style="margin:20px 0; border-color:#333;">
     <label for="dataBloqueio">Selecione a data para bloqueio:</label>
     <input type="date" id="dataBloqueio">
-
     <button id="btnBloquearDia">🔒 Bloquear Dia</button>
-    
-    <button id="btnRelatorioDiario">📊 Enviar relatório do dia</button>
 
-    <button id="btnSairAdmin">❌ Sair</button>
+    <div class="admin-acoes">
+      <button id="btnRelatorioDiario" class="btn-relatorio">📊 Enviar relatório do dia</button>
+      <button id="btnSairAdmin" class="btn-sair">❌ Sair</button>
+    </div>
 
   </div>
 
   <footer class="rodape">
-    © 2026 • Barber Madruga
+    © 2026 • Barber Madruga 💈
   </footer>
 
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div id="modalConfirmacao" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>📋 Confirmar agendamento?</h3>
+    <div id="modalResumo" class="modal-resumo"></div>
+    <div class="modal-btns">
+      <button id="modalCancelar" class="btn-modal-cancelar">❌ Voltar</button>
+      <button id="modalConfirmar" class="btn-modal-confirmar">✅ Confirmar</button>
+    </div>
+  </div>
 </div>
 
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 <script src="firebase.js"></script>
 <script src="script.js"></script>
 
