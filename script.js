@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 Barber Madruga 💈`;
 
-    const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
+    const url = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
 
     form.reset();
     horariosDiv.innerHTML = `<p class="hint-horario">👆 Selecione uma data para ver os horários disponíveis</p>`;
@@ -417,7 +417,7 @@ Barber Madruga 💈`;
 
 Barber Madruga 💈`;
 
-              const urlCancelamento = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
+              const urlCancelamento = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
 
               mostrarMensagem("Agendamento cancelado com sucesso!");
               li.remove();
@@ -682,14 +682,9 @@ Seu horário foi confirmado na Barbearia Madruga 💈
 
 Qualquer dúvida estou por aqui!`;
 
-const urlCliente = `https://wa.me/55${a.telefone}?text=${encodeURIComponent(mensagem)}`;
+const urlCliente = `https://wa.me/55${a.telefone}?text=${encodeURIComponent(mensagemCliente)}`;
 
-
-window.location.href = url;
-
-setTimeout(() => {
-  window.open(urlCliente, "_blank");
-}, 1500);
+window.open(urlCliente, "_blank");
 
 };
 
@@ -777,7 +772,7 @@ ${linhas}
 
 Barber Madruga 💈`;
 
-        const urlRelatorio = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(relatorio)}`;
+        const urlRelatorio = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(relatorio)}`;
         window.open(urlRelatorio, "_blank");
         mostrarMensagem("✅ Relatório gerado com sucesso!");
 
