@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = id => document.getElementById(id);
   const db = window.db;
   const auth = firebase.auth();
+  let proximoCliente = null;
 
   /* ===== SERVIÇOS ===== */
   const servicos = {
@@ -518,6 +519,30 @@ Barber Madruga 💈`;
       lista.appendChild(li);
     });
   }
+  
+  // Chamar próximo cliente //
+const btnChamarProximo = $("btnChamarProximo");
+
+if (btnChamarProximo) {
+
+  btnChamarProximo.onclick = () => {
+
+    if (!proximoCliente) {
+      mostrarMensagem("Nenhum cliente na agenda.");
+      return;
+    }
+
+    const mensagem =
+`Olá ${proximoCliente.nome}!`;
+
+    const url = `https://wa.me/55${proximoCliente.telefone}?text=${encodeURIComponent(mensagem)}`;
+
+    window.open(url, "_blank");
+
+  };
+
+}
+  
 
   /* ===== CARREGAR ADMIN ===== */
 
@@ -539,7 +564,7 @@ Barber Madruga 💈`;
     listaHist.innerHTML = `<li style="color:#666;font-style:italic;">Carregando...</li>`;
 
     let qtdHoje = 0, faturamentoHoje = 0;
-    let proximoCliente = null;
+   proximoCliente = null;
     let faturamentoMes = 0, qtdMes = 0, faturamentoMesAnterior = 0;
 
     const snapshot = await db.collection("agendamentos")
@@ -576,7 +601,14 @@ Barber Madruga 💈`;
       // Próximo cliente
       if (dataHora > agora) {
         if (!proximoCliente || dataHora < proximoCliente.dataHora) {
-          proximoCliente = { nome: a.nome, hora: a.hora, dataHora };
+          proximoCliente = {
+  nome: a.nome,
+  hora: a.hora,
+  telefone: a.telefone,
+  servico: a.servico,
+  data: a.data,
+  dataHora
+};
         }
       }
 
@@ -590,6 +622,7 @@ Barber Madruga 💈`;
       if (dataHora.getMonth() === mesAnterior && dataHora.getFullYear() === anoMesAnterior) {
         faturamentoMesAnterior += Number(a.preco);
       }
+      
 
       // ===== AGENDA ATIVA =====
       if (dataHora >= agora) {
@@ -605,6 +638,12 @@ Barber Madruga 💈`;
         }
 
         const li = document.createElement("li");
+        
+        if (a.chamado) {
+  li.style.borderLeft = "4px solid #27ae60";
+  li.style.background = "#1a2f1a";
+}
+
         li.innerHTML = `
           <strong>⏰ ${a.hora}</strong> — ✂️ ${a.servico} — 💰 R$ ${a.preco},00<br>
           👤 ${a.nome} &nbsp;|&nbsp; 📱 ${formatarTelefone(a.telefone)}
@@ -622,9 +661,37 @@ Barber Madruga 💈`;
           mostrarMensagem("Agendamento removido!");
           carregarAdmin();
         };
+        
+        /* ===== BOTÃO WHATSAPP CLIENTE ===== */
 
-        li.appendChild(btnRemover);
-        listaAg.appendChild(li);
+const btnMensagem = document.createElement("button");
+btnMensagem.textContent = "💬 WhatsApp";
+btnMensagem.style.cssText =
+"margin-top:8px;margin-left:6px;background:#27ae60;color:white;font-size:12px;padding:7px 14px;";
+
+btnMensagem.onclick = () => {
+
+const mensagem =
+`Olá ${a.nome}!
+
+Seu horário na Barbearia Madruga 💈
+
+📅 ${formatarDataComDia(a.data)}
+⏰ ${a.hora}
+✂️ ${a.servico}
+
+Qualquer dúvida estou por aqui!`;
+
+const url = `https://wa.me/55${a.telefone}?text=${encodeURIComponent(mensagem)}`;
+
+window.open(url, "_blank");
+
+};
+
+      li.appendChild(btnRemover);
+li.appendChild(btnMensagem);
+
+listaAg.appendChild(li);
 
       } else {
 
