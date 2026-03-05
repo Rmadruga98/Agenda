@@ -533,7 +533,7 @@ if (btnChamarProximo) {
     }
 
     const mensagem =
-`Olá ${proximoCliente.nome}!`;
+`Olá, seu horário é o próximo, na Barber Madruga te aguardamos${proximoCliente.nome}!`;
 
     const url = `https://wa.me/55${proximoCliente.telefone}?text=${encodeURIComponent(mensagem)}`;
 
