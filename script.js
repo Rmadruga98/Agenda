@@ -42,6 +42,7 @@ detectarInstagram();
   const $ = id => document.getElementById(id);
   const db = window.db;
   const auth = firebase.auth();
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   let proximoCliente = null;
 
 
@@ -925,6 +926,22 @@ Barber Madruga 💈`;
   const btnSairAdmin   = $("btnSairAdmin");
   const erroLogin      = $("erroLogin");
 
+auth.onAuthStateChanged(user => {
+
+  const autorizado = localStorage.getItem("barbeariaAdminAutorizado");
+
+  if (user && autorizado === "true") {
+
+    areaAdmin.style.display = "block";
+    areaLoginAdmin.style.display = "none";
+    btnAdmin.style.display = "none";
+
+    carregarAdmin();
+    carregarDiasBloqueados();
+    escutarNovosAgendamentos();
+  }
+
+});
   let taps = 0;
 
   document.querySelector("h1").addEventListener("click", () => {
@@ -959,6 +976,9 @@ Barber Madruga 💈`;
 
     try {
       await auth.signInWithEmailAndPassword(email, senha);
+      
+        localStorage.setItem("barbeariaAdminAutorizado", "true");
+
       areaLoginAdmin.style.display = "none";
       areaAdmin.style.display = "block";
       carregarAdmin();
