@@ -1,5 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+/* ===== DETECTAR NAVEGADOR DO INSTAGRAM ===== */
+
+function detectarInstagram() {
+
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+  if (ua.includes("Instagram")) {
+
+    const aviso = document.createElement("div");
+
+    aviso.style.position = "fixed";
+    aviso.style.top = "0";
+    aviso.style.left = "0";
+    aviso.style.width = "100%";
+    aviso.style.background = "#111";
+    aviso.style.color = "#fff";
+    aviso.style.padding = "14px";
+    aviso.style.zIndex = "9999";
+    aviso.style.textAlign = "center";
+    aviso.style.fontSize = "14px";
+
+    aviso.innerHTML =
+    `⚠️ Para melhor funcionamento do agendamento,<br>
+    abra este link no navegador do celular.<br><br>
+    👉 Toque nos <b>3 pontinhos</b> no canto superior e escolha<br>
+    <b>"Abrir no navegador"</b>.`;
+
+    document.body.prepend(aviso);
+  }
+
+}
+
+detectarInstagram();
+
   /* ===== CONFIG ===== */
   const WHATSAPP = "5535998066403";
   const HORA_ABERTURA = 8;
@@ -9,6 +43,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const db = window.db;
   const auth = firebase.auth();
   let proximoCliente = null;
+
+
+/* ===== FIREBASE NOTIFICAÇÕES ===== */
+let messaging = null;
+
+if (firebase.messaging && firebase.messaging.isSupported()) {
+  messaging = firebase.messaging();
+}
+
+/* ===== ATIVAR NOTIFICAÇÕES ===== */
+
+async function ativarNotificacoes() {
+
+  try {
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+
+      if (!messaging) return;
+
+const token = await messaging.getToken({
+        vapidKey: "BFxMHW4NyJl9QWwIWXYqQDq7XCW1TufXeM32xmKQXLPpOS8-quleDiW_eolIyqaw7pTDPrTKoGqoOrV-NxtvRWk"
+      });
+
+      console.log("Token de notificação:", token);
+
+    }
+
+  } catch (error) {
+
+    console.error("Erro ao ativar notificações:", error);
+
+  }
+
+}
+if ("Notification" in window) {
+  ativarNotificacoes();
+}
 
   /* ===== SERVIÇOS ===== */
   const servicos = {
@@ -533,7 +606,8 @@ if (btnChamarProximo) {
     }
 
     const mensagem =
-`Olá, seu horário é o próximo, na Barber Madruga te aguardamos${proximoCliente.nome}!`;
+`Olá ${proximoCliente.nome}, seu horário é o próximo! 💈
+A Barbearia Madruga já está te aguardando.`;
 
     const url = `https://wa.me/55${proximoCliente.telefone}?text=${encodeURIComponent(mensagem)}`;
 
@@ -567,10 +641,16 @@ if (btnChamarProximo) {
    proximoCliente = null;
     let faturamentoMes = 0, qtdMes = 0, faturamentoMesAnterior = 0;
 
-    const snapshot = await db.collection("agendamentos")
-      .orderBy("data")
-      .orderBy("hora")
-      .get();
+db.collection("agendamentos")
+  .orderBy("data")
+  .orderBy("hora")
+  .onSnapshot(snapshot => {
+qtdHoje = 0;
+faturamentoHoje = 0;
+faturamentoMes = 0;
+qtdMes = 0;
+faturamentoMesAnterior = 0;
+proximoCliente = null;
 
     listaAg.innerHTML   = "";
     listaHist.innerHTML = "";
@@ -719,8 +799,9 @@ listaAg.appendChild(li);
     if (faturamentoMesEl)      faturamentoMesEl.textContent      = `R$ ${faturamentoMes},00`;
     if (qtdMesEl)              qtdMesEl.textContent              = qtdMes;
     if (faturamentoMesAnteriorEl) faturamentoMesAnteriorEl.textContent = `R$ ${faturamentoMesAnterior},00`;
-  }
-
+  
+});
+}
   /* ===== RELATÓRIO DIÁRIO ===== */
   const btnRelatorio = $("btnRelatorioDiario");
   if (btnRelatorio) {
@@ -882,6 +963,7 @@ Barber Madruga 💈`;
       areaAdmin.style.display = "block";
       carregarAdmin();
       carregarDiasBloqueados();
+      escutarNovosAgendamentos();
       mostrarMensagem("✅ Login realizado com sucesso!");
     } catch (err) {
       console.error(err);
@@ -947,4 +1029,26 @@ Barber Madruga 💈`;
     }
   }
 
+function escutarNovosAgendamentos() {
+
+  db.collection("agendamentos")
+    .orderBy("criadoEm", "desc")
+    .limit(1)
+    .onSnapshot(snapshot => {
+
+      snapshot.docChanges().forEach(change => {
+
+        if (change.type === "added") {
+
+          const a = change.doc.data();
+
+          mostrarMensagem(`🔔 Novo agendamento: ${a.nome} às ${a.hora}`);
+new Audio("notificacao.mp3").play();
+        }
+
+      });
+
+    });
+
+}
 });
