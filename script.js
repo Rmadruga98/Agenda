@@ -671,10 +671,10 @@ btnMensagem.style.cssText =
 
 btnMensagem.onclick = () => {
 
-const mensagem =
+const mensagemCliente =
 `Olá ${a.nome}!
 
-Seu horário na Barbearia Madruga 💈
+Seu horário foi confirmado na Barbearia Madruga 💈
 
 📅 ${formatarDataComDia(a.data)}
 ⏰ ${a.hora}
@@ -682,9 +682,14 @@ Seu horário na Barbearia Madruga 💈
 
 Qualquer dúvida estou por aqui!`;
 
-const url = `https://wa.me/55${a.telefone}?text=${encodeURIComponent(mensagem)}`;
+const urlCliente = `https://wa.me/55${a.telefone}?text=${encodeURIComponent(mensagem)}`;
 
-window.open(url, "_blank");
+
+window.location.href = url;
+
+setTimeout(() => {
+  window.open(urlCliente, "_blank");
+}, 1500);
 
 };
 
