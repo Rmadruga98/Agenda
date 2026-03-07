@@ -203,6 +203,8 @@ if ("Notification" in window) {
         .get();
 
       const ocupados = snap.docs.map(d => d.data().hora);
+      
+      let horariosDisponiveis = 0;
 
       horariosDiv.innerHTML = "";
 
@@ -227,6 +229,8 @@ if ("Notification" in window) {
         ) continue;
 
         if (ocupados.includes(hora)) continue;
+        
+horariosDisponiveis++;
 
         const btn = document.createElement("button");
         btn.type = "button";
@@ -241,7 +245,23 @@ if ("Notification" in window) {
 
         horariosDiv.appendChild(btn);
       }
+/* ===== CONTADOR DE HORÁRIOS ===== */
 
+const contador = $("contadorHorarios");
+
+if (contador) {
+
+  if (horariosDisponiveis <= 1) {
+    contador.textContent = `🔥 Último horário disponível`;
+  }
+  else if (horariosDisponiveis <= 3) {
+    contador.textContent = `⚠️ Últimos ${horariosDisponiveis} horários disponíveis`;
+  }
+  else {
+    contador.textContent = `📅 ${horariosDisponiveis} horários disponíveis neste dia`;
+  }
+
+}
       if (horariosDiv.innerHTML === "") {
         horariosDiv.innerHTML = "<p class='dia-bloqueado'>⚠️ Todos os horários já estão preenchidos</p>";
       }

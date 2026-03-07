@@ -603,3 +603,14 @@ li:hover {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+.contador-horarios{
+background:#1a1a1a;
+border-left:4px solid #d4af37;
+padding:10px;
+margin-bottom:15px;
+font-size:14px;
+color:#d4af37;
+text-align:center;
+border-radius:6px;
+}
