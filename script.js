@@ -831,8 +831,10 @@ proximoCliente = null;
          try {
 
   await db.collection("agendamentos").doc(doc.id).update({
-    cancelado: true
-  });
+  cancelado: true,
+  telefone: a.telefone,
+  codigoCancelamento: a.codigoCancelamento
+});
 
   mostrarMensagem("✅ Agendamento removido!");
 
