@@ -57,7 +57,7 @@ function detectarInstagram() {
             width:100%;
             cursor:pointer;
           ">
-          🌐 Abrir no navegador
+          🌐 Sigua as instruções acima
         </button>
 
       </div>
