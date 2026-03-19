@@ -828,12 +828,24 @@ proximoCliente = null;
           if (!confirm(`Remover agendamento de ${a.nome} (${a.hora})?`)) return;
           btnRemover.disabled = true;
           btnRemover.textContent = "⏳...";
-         await db.collection("agendamentos").doc(doc.id).update({
-  cancelado: true
-});
-          mostrarMensagem("Agendamento removido!");
-          carregarAdmin();
-        };
+         try {
+
+  await db.collection("agendamentos").doc(doc.id).update({
+    cancelado: true
+  });
+
+  mostrarMensagem("✅ Agendamento removido!");
+
+  li.remove(); // remove da tela na hora
+
+} catch (erro) {
+
+  console.error(erro);
+  mostrarMensagem("❌ Erro ao remover", "erro");
+
+  btnRemover.disabled = false;
+  btnRemover.textContent = "❌ Remover";
+}       };
         
         /* ===== BOTÃO WHATSAPP CLIENTE ===== */
 
