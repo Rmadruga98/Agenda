@@ -241,7 +241,10 @@ if ("Notification" in window) {
         .where("data", "==", data)
         .get();
 
-      const ocupados = snap.docs.map(d => d.data().hora);
+      const ocupados = snap.docs
+  .map(d => d.data())
+  .filter(a => !a.cancelado) // 👈 IGNORA CANCELADOS
+  .map(a => a.hora);
       
       let horariosDisponiveis = 0;
 
@@ -493,6 +496,7 @@ Barber Madruga 💈`;
   if (btnConsultar) {
     btnConsultar.onclick = async () => {
 
+
       const telefone = telefoneParaNumeros($("telefoneConsulta").value.trim());
       const codigoDigitado = $("codigoConsulta").value.trim();
 
@@ -512,60 +516,79 @@ Barber Madruga 💈`;
           .where("telefone", "==", telefone)
           .get();
 
-        const agora = new Date();
         let encontrou = false;
 
-        snapshot.forEach(doc => {
-          const a = doc.data();
-          const [A, M, D] = a.data.split("-").map(Number);
-          const [H, Mi] = a.hora.split(":").map(Number);
-          const dataHora = new Date(A, M - 1, D, H, Mi);
+   snapshot.forEach(doc => {
 
-const diferencaMin = (dataHora - agora) / 60000;
+  const a = doc.data();
 
-if (
-  diferencaMin >= 60 &&
-  Number(a.codigoCancelamento) === Number(codigoDigitado)
-)
-{
+  const [A, M, D] = a.data.split("-").map(Number);
+  const [H, Mi] = a.hora.split(":").map(Number);
+  const dataHora = new Date(A, M - 1, D, H, Mi);
 
-            encontrou = true;
+  const agora = new Date();
+  const diferencaMin = (dataHora - agora) / 60000;
 
-            const li = document.createElement("li");
-            li.innerHTML = `
-              📅 ${formatarDataComDia(a.data)}<br>
-              ⏰ ${a.hora}<br>
-              ✂️ ${a.servico}<br>
-              💰 R$ ${a.preco},00
-            `;
+  // validar código
+  if (Number(a.codigoCancelamento) !== Number(codigoDigitado)) return;
 
-            const btnCancelar = document.createElement("button");
-            btnCancelar.textContent = "❌ Cancelar agendamento";
-            btnCancelar.style.cssText = "margin-top:10px;background:#c0392b;color:white;width:100%;";
+  encontrou = true;
 
-            btnCancelar.onclick = async () => {
+  const li = document.createElement("li");
 
-              if (!confirm("⚠️ Tem certeza que deseja cancelar?\n\nEsse horário será liberado para outro cliente.")) return;
+  li.innerHTML = `
+    📅 ${formatarDataComDia(a.data)}<br>
+    ⏰ ${a.hora}<br>
+    ✂️ ${a.servico}<br>
+    💰 R$ ${a.preco},00
+  `;
 
-const agora = new Date();
-const diferencaMin = (dataHora - agora) / 60000;
+  // ===== VISUAL CANCELADO =====
+  if (a.cancelado) {
+    li.style.opacity = "0.4";
+    li.style.textDecoration = "line-through";
+    li.innerHTML += "<br>❌ Cancelado";
+  }
 
-if (diferencaMin < 60) {
-  mostrarMensagem("⚠️ Cancelamento permitido apenas com 1h de antecedência", "erro");
-  return;
-}
+  // ===== BOTÃO CANCELAR =====
+  if (!a.cancelado && diferencaMin >= 60) {
 
-              btnCancelar.disabled = true;
-              btnCancelar.textContent = "⏳ Cancelando...";
+    const btnCancelar = document.createElement("button");
+    btnCancelar.textContent = "❌ Cancelar agendamento";
+    btnCancelar.style.cssText =
+      "margin-top:10px;background:#c0392b;color:white;width:100%;";
 
-              await db.collection("agendamentos").doc(doc.id).update({
-  cancelado: true
-});
+    btnCancelar.onclick = async () => {
 
-mostrarMensagem("✅ Agendamento cancelado!");
+  btnCancelar.disabled = true;
+  btnCancelar.textContent = "⏳ Cancelando...";
 
-   const mensagemCancelamento =
-`❌ CANCELAMENTO DE AGENDAMENTO
+  if (!confirm("⚠️ Tem certeza que deseja cancelar?\n\nEsse horário será liberado para outro cliente.")) {
+    btnCancelar.disabled = false;
+    btnCancelar.textContent = "❌ Cancelar agendamento";
+    return;
+  }
+
+  const agora = new Date();
+  const diferencaMin = (dataHora - agora) / 60000;
+
+  if (diferencaMin < 60) {
+    mostrarMensagem("⚠️ Cancelamento permitido apenas com 1h de antecedência", "erro");
+
+    btnCancelar.disabled = false;
+    btnCancelar.textContent = "❌ Cancelar agendamento";
+    return;
+  }
+
+  await db.collection("agendamentos").doc(doc.id).update({
+    cancelado: true,
+    telefone: a.telefone,
+    codigoCancelamento: a.codigoCancelamento
+  });
+
+  mostrarMensagem("✅ Agendamento cancelado!");
+
+  const mensagemCancelamento = `❌ CANCELAMENTO DE AGENDAMENTO
 
 👤 ${a.nome}
 📅 ${formatarDataComDia(a.data)}
@@ -574,24 +597,27 @@ mostrarMensagem("✅ Agendamento cancelado!");
 
 Seu horário foi cancelado com sucesso.
 
-Caso queira reagendar, estamos à disposição 💈
+Barber Madruga 💈`;
 
-Barber Madruga`;
+  const url = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
 
-              const urlCancelamento = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
+  window.open(url, "_blank");
 
-              mostrarMensagem("Agendamento cancelado com sucesso!");
-              li.remove();
+  li.style.opacity = "0.4";
+  li.style.textDecoration = "line-through";
+  btnCancelar.remove();
 
-              setTimeout(() => {
-                window.open(urlCancelamento, "_blank");
-              }, 600);
-            };
+  if (!li.innerHTML.includes("Cancelado")) {
+    li.innerHTML += "<br>❌ Cancelado";
+  }
+};
 
-            li.appendChild(btnCancelar);
-            listaMeus.appendChild(li);
-          }
-        });
+    li.appendChild(btnCancelar);
+  }
+
+  listaMeus.appendChild(li);
+
+});
 
         if (!encontrou) {
           listaMeus.innerHTML = "<li style='border-left-color:#666;color:#aaa;'>Nenhum agendamento encontrado ou código incorreto.</li>";
