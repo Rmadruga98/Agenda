@@ -1109,37 +1109,46 @@ auth.onAuthStateChanged(user => {
 
   /* ===== PWA ===== */
 
-  let deferredPrompt = null;
-  const btnInstalar = $("btnInstalar");
+let deferredPrompt = null;
+const btnInstalar = $("btnInstalar");
 
-  if (btnInstalar) {
-    window.addEventListener("beforeinstallprompt", e => {
-      e.preventDefault();
-      deferredPrompt = e;
-      btnInstalar.style.display = "block";
-    });
+if (btnInstalar) {
 
-    btnInstalar.onclick = async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === "accepted") {
-        btnInstalar.style.display = "none";
-      }
-      deferredPrompt = null;
-    };
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
 
-    window.addEventListener("appinstalled", () => {
-      btnInstalar.style.display = "none";
-    });
+    btnInstalar.style.display = "block";
 
-    if (
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
-    ) {
+    mostrarMensagem("📲 Instale o app para agendar mais rápido!");
+  });
+
+  btnInstalar.onclick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
       btnInstalar.style.display = "none";
     }
+
+    deferredPrompt = null;
+  };
+
+  window.addEventListener("appinstalled", () => {
+    btnInstalar.style.display = "none";
+  });
+
+  if (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  ) {
+    btnInstalar.style.display = "none";
   }
+
+}
 
 function escutarNovosAgendamentos() {
 

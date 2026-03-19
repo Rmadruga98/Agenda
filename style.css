@@ -624,3 +624,33 @@ border-radius:6px;
 #btnAbrirFora {
   animation: pulse 1.5s infinite;
 }
+
+#btnInstalar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: #000;
+  font-weight: bold;
+  font-size: 16px;
+  
+  padding: 14px 22px;
+  border-radius: 12px;
+  border: none;
+  
+  box-shadow: 0 8px 25px rgba(241, 196, 15, 0.4);
+  
+  z-index: 9999;
+  display: none;
+  
+  animation: pulse 1.5s infinite;
+}
+
+/* animação */
+@keyframes pulse {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+  100% { transform: translateX(-50%) scale(1); }
+}
