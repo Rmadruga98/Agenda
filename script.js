@@ -424,11 +424,18 @@ Barber Madruga 💈`;
     $("btnAgendarText").style.display = "";
     $("btnAgendarLoading").style.display = "none";
 
-    setTimeout(() => {
-      window.open(url, "_blank");
-    }, 800);
-  }
+  try {
+  mostrarMensagem("📲 Abrindo WhatsApp...");
 
+  setTimeout(() => {
+    window.location.href = url;
+  }, 500);
+
+} catch (e) {
+  mostrarMensagem("⚠️ Não foi possível abrir o WhatsApp", "erro");
+}
+  }
+  
   /* ===== MEUS AGENDAMENTOS ===== */
 
   const btnMeus     = $("btnMeusAgendamentos");
@@ -475,7 +482,13 @@ Barber Madruga 💈`;
           const [H, Mi] = a.hora.split(":").map(Number);
           const dataHora = new Date(A, M - 1, D, H, Mi);
 
-          if (dataHora >= agora && Number(a.codigoCancelamento) === Number(codigoDigitado)) {
+const diferencaMin = (dataHora - agora) / 60000;
+
+if (
+  diferencaMin >= 60 &&
+  Number(a.codigoCancelamento) === Number(codigoDigitado)
+)
+{
 
             encontrou = true;
 
@@ -493,23 +506,38 @@ Barber Madruga 💈`;
 
             btnCancelar.onclick = async () => {
 
-              if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+              if (!confirm("⚠️ Tem certeza que deseja cancelar?\n\nEsse horário será liberado para outro cliente.")) return;
+
+const agora = new Date();
+const diferencaMin = (dataHora - agora) / 60000;
+
+if (diferencaMin < 60) {
+  mostrarMensagem("⚠️ Cancelamento permitido apenas com 1h de antecedência", "erro");
+  return;
+}
 
               btnCancelar.disabled = true;
               btnCancelar.textContent = "⏳ Cancelando...";
 
-              await db.collection("agendamentos").doc(doc.id).delete();
+              await db.collection("agendamentos").doc(doc.id).update({
+  cancelado: true
+});
 
-              const mensagemCancelamento =
+mostrarMensagem("✅ Agendamento cancelado!");
+
+   const mensagemCancelamento =
 `❌ CANCELAMENTO DE AGENDAMENTO
 
 👤 ${a.nome}
 📅 ${formatarDataComDia(a.data)}
 ⏰ ${a.hora}
 ✂️ ${a.servico}
-📱 ${formatarTelefone(a.telefone)}
 
-Barber Madruga 💈`;
+Seu horário foi cancelado com sucesso.
+
+Caso queira reagendar, estamos à disposição 💈
+
+Barber Madruga`;
 
               const urlCancelamento = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagemCancelamento)}`;
 
@@ -689,6 +717,9 @@ proximoCliente = null;
     snapshot.forEach(doc => {
 
       const a = doc.data();
+      
+      if (a.cancelado) return;
+      
       const [A, M, D] = a.data.split("-").map(Number);
       const [H, Mi] = a.hora.split(":").map(Number);
       const dataHora = new Date(A, M - 1, D, H, Mi);
@@ -758,7 +789,9 @@ proximoCliente = null;
           if (!confirm(`Remover agendamento de ${a.nome} (${a.hora})?`)) return;
           btnRemover.disabled = true;
           btnRemover.textContent = "⏳...";
-          await db.collection("agendamentos").doc(doc.id).delete();
+         await db.collection("agendamentos").doc(doc.id).update({
+  cancelado: true
+});
           mostrarMensagem("Agendamento removido!");
           carregarAdmin();
         };
