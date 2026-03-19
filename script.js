@@ -14,22 +14,61 @@ function detectarInstagram() {
     aviso.style.top = "0";
     aviso.style.left = "0";
     aviso.style.width = "100%";
-    aviso.style.background = "#111";
+    aviso.style.height = "100%";
+    aviso.style.background = "rgba(0,0,0,0.95)";
     aviso.style.color = "#fff";
-    aviso.style.padding = "14px";
-    aviso.style.zIndex = "9999";
+    aviso.style.zIndex = "99999";
+    aviso.style.display = "flex";
+    aviso.style.flexDirection = "column";
+    aviso.style.justifyContent = "center";
+    aviso.style.alignItems = "center";
     aviso.style.textAlign = "center";
-    aviso.style.fontSize = "14px";
+    aviso.style.padding = "20px";
+    aviso.style.fontSize = "16px";
 
-    aviso.innerHTML =
-    `⚠️ Para melhor funcionamento do agendamento,<br>
-    abra este link no navegador do celular.<br><br>
-    👉 Toque nos <b>3 pontinhos</b> no canto superior e escolha<br>
-    <b>"Abrir no navegador"</b>.`;
+    aviso.innerHTML = `
+      <div style="max-width:350px;">
+        
+        <h2 style="color:#f1c40f;margin-bottom:10px;">⚠️ Atenção</h2>
 
-    document.body.prepend(aviso);
+        <p style="margin-bottom:15px;">
+          Para agendar corretamente,<br>
+          abra este link no navegador do celular.
+        </p>
+
+        <div style="background:#1c1c1c;padding:12px;border-radius:10px;margin-bottom:15px;">
+          👉 Toque nos <b>3 pontinhos</b> no canto superior<br>
+          👉 Clique em <b>"Abrir no navegador"</b>
+        </div>
+
+        <p style="font-size:13px;color:#aaa;margin-bottom:20px;">
+          (Isso evita erros no agendamento)
+        </p>
+
+        <button id="btnAbrirFora"
+          style="
+            background:#f1c40f;
+            color:#000;
+            border:none;
+            padding:14px 20px;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:bold;
+            width:100%;
+            cursor:pointer;
+          ">
+          🌐 Abrir no navegador
+        </button>
+
+      </div>
+    `;
+
+    document.body.appendChild(aviso);
+
+    document.getElementById("btnAbrirFora").onclick = () => {
+      window.location.href = window.location.href;
+    };
   }
-
 }
 
 detectarInstagram();
