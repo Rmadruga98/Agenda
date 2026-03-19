@@ -245,6 +245,13 @@ if ("Notification" in window) {
   .map(d => d.data())
   .filter(a => !a.cancelado) // 👈 IGNORA CANCELADOS
   .map(a => a.hora);
+  
+  // 🔥 buscar horários bloqueados
+const bloqueadosSnap = await db.collection("horariosBloqueados")
+  .where("data", "==", data)
+  .get();
+
+const bloqueados = bloqueadosSnap.docs.map(d => d.data().hora);
       
       let horariosDisponiveis = 0;
 
@@ -270,7 +277,7 @@ if ("Notification" in window) {
           agoraReal >= dataHora
         ) continue;
 
-        if (ocupados.includes(hora)) continue;
+        if (ocupados.includes(hora) || bloqueados.includes(hora)) continue;
         
 horariosDisponiveis++;
 
@@ -666,6 +673,43 @@ Barber Madruga 💈`;
       carregarDiasBloqueados();
     });
   }
+  /* ===== BLOQUEAR HORÁRIO ===== */
+
+const btnBloquearHorario = $("btnBloquearHorario");
+const dataBloqueioHora = $("dataBloqueioHora");
+const horaBloqueio = $("horaBloqueio");
+
+if (btnBloquearHorario) {
+  btnBloquearHorario.onclick = async () => {
+
+    if (!auth.currentUser) {
+      mostrarMensagem("Faça login como administrador.", "erro");
+      return;
+    }
+
+    if (!dataBloqueioHora.value || !horaBloqueio.value) {
+      mostrarMensagem("Selecione data e hora.", "erro");
+      return;
+    }
+
+    btnBloquearHorario.disabled = true;
+    btnBloquearHorario.textContent = "⏳ Bloqueando...";
+
+    await db.collection("horariosBloqueados").add({
+      data: dataBloqueioHora.value,
+      hora: horaBloqueio.value,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    mostrarMensagem("⛔ Horário bloqueado com sucesso!");
+
+    dataBloqueioHora.value = "";
+    horaBloqueio.value = "";
+
+    btnBloquearHorario.disabled = false;
+    btnBloquearHorario.textContent = "⛔ Bloquear Horário";
+  };
+}
 
   async function carregarDiasBloqueados() {
     const lista = $("listaDiasBloqueados");
