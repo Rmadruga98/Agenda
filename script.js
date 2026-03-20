@@ -270,6 +270,7 @@ const bloqueados = bloqueadosSnap.docs.map(d => d.data().hora);
           dataSelecionada.getDate(),
           h
         );
+        
 
         // Ocultar horários passados no dia de hoje
         if (
@@ -312,7 +313,15 @@ if (contador) {
 
 }
       if (horariosDiv.innerHTML === "") {
-        horariosDiv.innerHTML = "<p class='dia-bloqueado'>⚠️ Todos os horários já estão preenchidos</p>";
+        horariosDiv.innerHTML = `
+  <p class='dia-bloqueado' style="
+    text-align:center;
+    width:100%;
+    display:block;
+  ">
+    ⚠️ Todos os horários já estão preenchidos
+  </p>
+`;
       }
 
       // Atualizar label com horário de funcionamento
@@ -673,6 +682,8 @@ Barber Madruga 💈`;
       carregarDiasBloqueados();
     });
   }
+  
+  
   /* ===== BLOQUEAR HORÁRIO ===== */
 
 const btnBloquearHorario = $("btnBloquearHorario");
@@ -703,12 +714,66 @@ if (btnBloquearHorario) {
 
     mostrarMensagem("⛔ Horário bloqueado com sucesso!");
 
+carregarHorariosBloqueados();
+
     dataBloqueioHora.value = "";
     horaBloqueio.value = "";
-
     btnBloquearHorario.disabled = false;
-    btnBloquearHorario.textContent = "⛔ Bloquear Horário";
+    btnBloquearHorario.textContent ="⛔Bloquear Horário";
   };
+}
+
+/* ===== DESBLOQUEAR HORÁRIO ===== */
+
+async function carregarHorariosBloqueados() {
+  const lista = $("listaHorariosBloqueados");
+  if (!lista) return;
+
+  lista.innerHTML = "<li style='color:#666;'>Carregando...</li>";
+
+  const snapshot = await db.collection("horariosBloqueados").get();
+
+  if (snapshot.empty) {
+    lista.innerHTML = "<li style='color:#666;'>Nenhum horário bloqueado</li>";
+    return;
+  }
+
+  lista.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const h = doc.data();
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      📅 ${formatarDataComDia(h.data)}<br>
+      ⏰ ${h.hora}
+    `;
+
+    const btnDesbloquear = document.createElement("button");
+    btnDesbloquear.textContent = "🔓 Desbloquear";
+    btnDesbloquear.style.cssText =
+      "margin-top:8px;background:#2a2a2a;color:#d4af37;border:1px solid #d4af37;padding:6px;width:100%;";
+
+    btnDesbloquear.onclick = async () => {
+
+      if (!auth.currentUser) {
+        mostrarMensagem("Faça login como administrador.", "erro");
+        return;
+      }
+
+      btnDesbloquear.disabled = true;
+      btnDesbloquear.textContent = "⏳...";
+
+      await db.collection("horariosBloqueados").doc(doc.id).delete();
+
+      mostrarMensagem("✅ Horário desbloqueado!");
+
+      carregarHorariosBloqueados();
+    };
+
+    li.appendChild(btnDesbloquear);
+    lista.appendChild(li);
+  });
 }
 
   async function carregarDiasBloqueados() {
@@ -1113,6 +1178,7 @@ auth.onAuthStateChanged(user => {
     btnAdmin.style.display = "none";
 
     carregarAdmin();
+    carregarDiasBloqueados();
     carregarDiasBloqueados();
     escutarNovosAgendamentos();
   }
