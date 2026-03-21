@@ -476,7 +476,7 @@ Barber Madruga 💈`;
     const url = `https://wa.me/55${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
 
     form.reset();
-    horariosDiv.innerHTML = `<p class="hint-horario">👆 Selecione uma data para ver os horários disponíveis</p>`;
+    horariosDiv.innerHTML = `<div class="hint-horario">👆 Selecione uma data para ver os horários disponíveis</div>`;
     precoBox.style.display = "none";
     btnSubmit.disabled = false;
     $("btnAgendarText").style.display = "";
