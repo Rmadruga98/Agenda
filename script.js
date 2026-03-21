@@ -434,7 +434,7 @@ if (contador) {
         .where("data", "==", ag.data)
         .where("hora", "==", ag.hora)
         .get();
-
+const existeValido = verifica.docs.some(doc => !doc.data().cancelado);
       if (!verifica.empty) {
         mostrarMensagem("⚡ Esse horário acabou de ser reservado! Escolha outro.", "erro");
         btnSubmit.disabled = false;
@@ -708,11 +708,11 @@ if (btnBloquearHorario) {
 
     await db.collection("horariosBloqueados").add({
       data: dataBloqueioHora.value,
-      hora: horaBloqueio.value,
+      hora: horaBloqueio.value.slice(0,5),
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    mostrarMensagem("⛔ Horário bloqueado com sucesso!");
+    carregarHorarios(dataBloqueioHora.value);
 
 carregarHorariosBloqueados();
 
@@ -1179,7 +1179,6 @@ auth.onAuthStateChanged(user => {
 
     carregarAdmin();
     carregarDiasBloqueados();
-    carregarDiasBloqueados();
     escutarNovosAgendamentos();
   }
 
@@ -1300,12 +1299,19 @@ if (btnInstalar) {
 
 }
 
-function escutarNovosAgendamentos() {
+ function escutarNovosAgendamentos() {
+
+  let primeiraExecucao = true;
 
   db.collection("agendamentos")
     .orderBy("criadoEm", "desc")
     .limit(1)
     .onSnapshot(snapshot => {
+
+      if (primeiraExecucao) {
+        primeiraExecucao = false;
+        return;
+      }
 
       snapshot.docChanges().forEach(change => {
 
@@ -1314,7 +1320,9 @@ function escutarNovosAgendamentos() {
           const a = change.doc.data();
 
           mostrarMensagem(`🔔 Novo agendamento: ${a.nome} às ${a.hora}`);
-new Audio("notificacao.mp3").play();
+          const audio = new Audio("notificacao.mp3");
+audio.volume = 1;
+audio.play().catch(() => {});
         }
 
       });
