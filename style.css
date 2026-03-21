@@ -279,12 +279,21 @@ button[type="submit"]:hover:not(:disabled) {
 .dia-bloqueado {
   background: linear-gradient(135deg, #6b0000, #8b0000);
   color: #ffaaaa;
+  
   padding: 16px 20px;
   border-radius: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   text-align: center;
   font-size: 15px;
   font-weight: 600;
+
   grid-column: 1 / -1;
+  width: 100%;
+
   animation: pulse 2s infinite;
   border: 1px solid rgba(255,0,0,0.3);
 }
