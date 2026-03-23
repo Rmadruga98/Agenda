@@ -95,6 +95,7 @@ input, select {
   border: 1.5px solid #2e2e2e;
   font-size: 14px;
   background: #1e1e1e;
+    backdrop-filter: blur(6px);
   color: white;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -146,7 +147,12 @@ button {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.1s;
+}
+button,
+.hora-btn {
+  transition: transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:disabled {
@@ -162,6 +168,7 @@ button[type="submit"] {
   font-size: 15px;
   box-shadow: 0 4px 14px rgba(212,175,55,0.35);
   margin-top: 6px;
+  letter-spacing: 0.5px;
 }
 
 button[type="submit"]:hover:not(:disabled) {
@@ -206,6 +213,11 @@ button[type="submit"]:hover:not(:disabled) {
   font-size: 12px;
 }
 
+button:active,
+.hora-btn:active {
+  transform: scale(0.96);
+}
+
 /* ===== HINT HORÁRIO ===== */
 .hint-horario {
   grid-column: 1 / -1;
@@ -231,9 +243,10 @@ button[type="submit"]:hover:not(:disabled) {
   border-radius: 8px;
   padding: 11px 8px;
   cursor: pointer;
-  transition: all 0.2s;
   font-size: 14px;
   font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
+  will-change: transform;
 }
 
 .hora-btn:hover {
@@ -246,8 +259,15 @@ button[type="submit"]:hover:not(:disabled) {
   background: linear-gradient(135deg, #d4af37, #f1c40f);
   color: #000;
   border-color: transparent;
-  box-shadow: 0 2px 10px rgba(212,175,55,0.4);
+  box-shadow: 0 4px 14px rgba(212,175,55,0.5);
   font-weight: 700;
+
+  animation: pop 0.2s ease;
+  transform: scale(1.08);
+}
+.hora-btn:not(.ativa) {
+  opacity: 0.85;
+  transform: scale(1);
 }
 
 /* ===== LOADING HORÁRIOS ===== */
@@ -279,8 +299,8 @@ button[type="submit"]:hover:not(:disabled) {
 .dia-bloqueado {
   background: linear-gradient(135deg, #6b0000, #8b0000);
   color: #ffaaaa;
-  
-  padding: 16px 20px;
+
+  padding: 14px;
   border-radius: 12px;
 
   display: flex;
@@ -288,11 +308,14 @@ button[type="submit"]:hover:not(:disabled) {
   align-items: center;
 
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 
   grid-column: 1 / -1;
   width: 100%;
+
+  line-height: 1.4;
+  word-break: break-word;
 
   animation: pulse 2s infinite;
   border: 1px solid rgba(255,0,0,0.3);
@@ -630,10 +653,11 @@ border-radius:6px;
 }
 
 #btnInstalar {
+  animation: pulseBtn 1.5s infinite;
   position: fixed;
   bottom: 20px;
   left: 50%;
-  transform: translateX(-50%);
+translate: -50% 0;
   
   background: linear-gradient(135deg, #f1c40f, #f39c12);
   color: #000;
@@ -648,13 +672,29 @@ border-radius:6px;
   
   z-index: 9999;
   display: none;
-  
-  animation: pulse 1.5s infinite;
 }
 
 /* animação */
-@keyframes pulse {
-  0% { transform: translateX(-50%) scale(1); }
-  50% { transform: translateX(-50%) scale(1.05); }
-  100% { transform: translateX(-50%) scale(1); }
+@keyframes pulseBtn {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.aviso {
+  text-align: center;
+  word-wrap: break-word;
+  font-size: 14px;
+}
+#btnChamar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 12px;
+  z-index: 999;
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1.08); }
 }
