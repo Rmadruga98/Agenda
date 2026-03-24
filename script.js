@@ -1154,6 +1154,7 @@ Barber Madruga 💈`;
     btnRefresh.onclick = () => {
       carregarAdmin();
       carregarDiasBloqueados();
+      carregarHorariosBloqueados();
       mostrarMensagem("🔄 Dados atualizados!");
     };
   }
@@ -1179,6 +1180,7 @@ auth.onAuthStateChanged(user => {
 
     carregarAdmin();
     carregarDiasBloqueados();
+    carregarHorariosBloqueados();
     escutarNovosAgendamentos();
   }
 
